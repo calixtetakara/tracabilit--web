@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChainCacao – Traçabilité EUDR</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #1e3a1e;
+    --green-mid: #2c5e2a;
+    --green-light: #4a8c48;
+    --accent: #e67e22;
+    --accent-hover: #c96a10;
+    --cream: #eef3e6;
+    --card-bg: #ffffff;
+    --muted: #eef3e6;
+    --border: #d4e0c8;
+    --text: #1e3a1e;
+    --text-soft: #4a6840;
+    --shadow: 0 4px 24px rgba(30,58,30,0.10);
+    --radius: 24px;
+    --radius-sm: 14px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Sora',sans-serif; background:var(--cream); color:var(--text); min-height:100vh; }
+
+  /* TOPBAR */
+  .topbar { background:var(--forest); padding:0 32px; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:200; box-shadow:0 2px 16px rgba(0,0,0,0.25); }
+  .topbar-brand { display:flex; align-items:center; gap:12px; color:white; font-weight:800; font-size:1.1rem; letter-spacing:-0.3px; }
+  .topbar-brand .logo-slot { width:38px; height:38px; display:flex; align-items:center; justify-content:center; }
+  .topbar-brand .logo-slot svg, .topbar-brand .logo-slot img { width:38px; height:38px; object-fit:contain; }
+  .topbar-right { display:flex; align-items:center; gap:10px; }
+  .role-pill { background:var(--accent); color:white; font-size:0.72rem; font-weight:700; padding:5px 14px; border-radius:40px; letter-spacing:0.5px; text-transform:uppercase; display:flex; align-items:center; gap:6px; }
+  .topbar-user { color:rgba(255,255,255,0.65); font-size:0.82rem; font-weight:600; }
+  .topbar-logout { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:6px 14px; border-radius:40px; font-size:0.78rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; transition:0.2s; }
+  .topbar-logout:hover { background:rgba(255,255,255,0.2); }
+
+  /* NAV TABS */
+  .nav-tabs { background:var(--green-mid); padding:0 32px; display:flex; gap:2px; overflow-x:auto; }
+  .nav-tab { color:rgba(255,255,255,0.5); font-size:0.8rem; font-weight:600; padding:12px 18px; cursor:pointer; border-bottom:3px solid transparent; transition:0.2s; white-space:nowrap; display:flex; align-items:center; gap:7px; }
+  .nav-tab:hover { color:rgba(255,255,255,0.85); }
+  .nav-tab.active { color:white; border-bottom-color:var(--accent); }
+  .nav-tab i[data-lucide] { width:15px; height:15px; }
+
+  /* LAYOUT */
+  .page { display:none; }
+  .page.active { display:block; }
+  .content { max-width:1280px; margin:0 auto; padding:28px 24px 72px; }
+  .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:22px; }
+  .grid-4 { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
+
+  /* CARDS */
+  .card { background:var(--card-bg); border-radius:var(--radius); padding:26px; box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:22px; }
+  .card-title { display:flex; align-items:center; gap:10px; font-size:1.05rem; font-weight:700; color:var(--forest); margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid var(--muted); }
+  .icon-box { width:32px; height:32px; background:var(--accent); border-radius:9px; display:flex; align-items:center; justify-content:center; color:white; flex-shrink:0; }
+  .icon-box.green { background:var(--green-mid); }
+  .icon-box.blue { background:#2563eb; }
+  .icon-box.purple { background:#7c3aed; }
+  .icon-box i[data-lucide] { width:15px; height:15px; }
+
+  /* STAT CARDS */
+  .stat-card { background:white; border-radius:var(--radius-sm); padding:18px 14px; text-align:center; border:1px solid var(--border); transition:0.2s; }
+  .stat-card:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+  .stat-icon { color:var(--green-mid); margin:0 auto 8px; }
+  .stat-icon i[data-lucide] { width:22px; height:22px; }
+  .stat-value { font-size:1.5rem; font-weight:800; color:var(--forest); line-height:1; }
+  .stat-label { font-size:0.68rem; color:var(--text-soft); font-weight:600; margin-top:4px; text-transform:uppercase; letter-spacing:0.5px; }
+
+  /* FORMS */
+  label { display:block; font-size:0.74rem; font-weight:700; color:var(--text-soft); margin-top:14px; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.4px; }
+  input, select, textarea { width:100%; padding:10px 16px; border-radius:60px; border:1.5px solid var(--border); background:#fafcf5; font-size:0.88rem; font-family:'Sora',sans-serif; color:var(--text); transition:0.2s; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--green-mid); box-shadow:0 0 0 3px rgba(44,94,42,0.1); }
+  textarea { border-radius:14px; resize:vertical; min-height:60px; }
+  .input-row { display:flex; gap:8px; align-items:flex-end; }
+  .input-row input { flex:1; }
+
+  /* BUTTONS */
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:10px 20px; border-radius:60px; border:none; font-family:'Sora',sans-serif; font-weight:700; font-size:0.85rem; cursor:pointer; transition:0.2s; }
+  .btn i[data-lucide] { width:15px; height:15px; }
+  .btn-primary { background:var(--green-mid); color:white; width:100%; margin-top:16px; }
+  .btn-primary:hover { background:var(--green-light); transform:translateY(-1px); }
+  .btn-accent { background:var(--accent); color:white; width:100%; margin-top:12px; }
+  .btn-accent:hover { background:var(--accent-hover); transform:translateY(-1px); }
+  .btn-outline { background:transparent; border:2px solid var(--green-mid); color:var(--green-mid); }
+  .btn-outline:hover { background:var(--green-mid); color:white; }
+  .btn-sm { padding:6px 14px; font-size:0.78rem; margin-top:0; }
+  .btn-full { width:100%; }
+
+  /* BADGES */
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:40px; font-size:0.68rem; font-weight:700; }
+  .badge i[data-lucide] { width:10px; height:10px; }
+  .badge-green { background:#dcfce7; color:#15803d; }
+  .badge-orange { background:#fed7aa; color:#c2410c; }
+  .badge-blue { background:#dbeafe; color:#1d4ed8; }
+  .badge-gray { background:var(--muted); color:var(--text-soft); }
+
+  /* LOT ITEMS */
+  .lot-item { background:var(--muted); border:1px solid var(--border); border-radius:var(--radius-sm); padding:13px 16px; margin-bottom:9px; cursor:pointer; transition:0.15s; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  .lot-item:hover { background:#e3eace; border-color:var(--green-mid); }
+  .lot-id { font-family:'Space Mono',monospace; font-size:0.8rem; font-weight:700; color:var(--forest); }
+  .lot-meta { font-size:0.76rem; color:var(--text-soft); }
+
+  /* TIMELINE */
+  .timeline { position:relative; padding-left:20px; margin-top:10px; }
+  .timeline::before { content:''; position:absolute; left:6px; top:0; bottom:0; width:2px; background:var(--border); }
+  .timeline-event { position:relative; margin-bottom:10px; background:#fafcf5; border-radius:var(--radius-sm); padding:10px 14px; border:1px solid var(--border); font-size:0.81rem; }
+  .timeline-event::before { content:''; position:absolute; left:-17px; top:14px; width:10px; height:10px; background:var(--accent); border-radius:50%; border:2px solid white; }
+  .timeline-step { font-weight:700; color:var(--forest); font-size:0.82rem; margin-bottom:4px; }
+  .timeline-detail { color:var(--text-soft); line-height:1.6; font-size:0.79rem; }
+  .timeline-detail i[data-lucide] { width:11px; height:11px; vertical-align:middle; margin-right:2px; }
+
+  /* QR BOX */
+  .qr-box { background:white; border:2px dashed var(--border); border-radius:var(--radius-sm); padding:20px; text-align:center; margin-top:14px; display:flex; flex-direction:column; align-items:center; }
+  .qr-box p { font-size:0.78rem; color:var(--text-soft); margin-top:10px; }
+  .qr-box canvas, .qr-box img { display:block; margin:0 auto; }
+
+  /* ALERTS */
+  .alert { border-radius:var(--radius-sm); padding:11px 15px; font-size:0.83rem; margin-top:12px; }
+  .alert-success { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; }
+  .alert-error   { background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; }
+  .alert-info    { background:#dbeafe; color:#1d4ed8; border:1px solid #bfdbfe; }
+  .alert-warn    { background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
+
+  /* RESULT BOX */
+  .result-box { background:var(--muted); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; margin-top:12px; font-size:0.83rem; }
+  .result-box .row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid var(--border); }
+  .result-box .row:last-child { border-bottom:none; }
+  .result-box .key { font-weight:600; color:var(--text-soft); font-size:0.74rem; text-transform:uppercase; letter-spacing:0.3px; }
+  .result-box .val { font-weight:700; color:var(--forest); text-align:right; max-width:60%; }
+
+  /* PROGRESS */
+  .progress-bar { background:var(--border); border-radius:40px; height:8px; overflow:hidden; margin-top:6px; }
+  .progress-fill { background:linear-gradient(90deg,var(--green-mid),var(--green-light)); height:100%; border-radius:40px; transition:width 0.5s; }
+
+  /* DIVIDER */
+  .divider { display:flex; align-items:center; gap:10px; margin:16px 0; font-size:0.72rem; font-weight:700; color:var(--text-soft); text-transform:uppercase; letter-spacing:0.5px; }
+  .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* IMAGE UPLOAD */
+  .img-upload-zone { border:2px dashed var(--border); border-radius:var(--radius-sm); padding:20px; text-align:center; cursor:pointer; transition:0.2s; background:#fafcf5; }
+  .img-upload-zone:hover { border-color:var(--green-mid); background:#f0f7ec; }
+  .img-upload-zone input[type=file] { display:none; }
+  .img-upload-icon { color:var(--text-soft); margin-bottom:8px; }
+  .img-upload-icon i[data-lucide] { width:28px; height:28px; }
+  .img-upload-text { font-size:0.78rem; color:var(--text-soft); font-weight:600; }
+  .img-preview { width:100%; max-height:140px; object-fit:cover; border-radius:10px; margin-top:10px; display:none; }
+
+  /* AUTH */
+  #authScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:#eef3e6; padding:24px; }
+  .auth-box { background:white; border-radius:var(--radius); padding:36px 32px; width:100%; max-width:420px; box-shadow:0 8px 20px rgba(0,0,0,0.08); border:1px solid var(--border); border-top:4px solid var(--accent); position:relative; }
+  .auth-logo { text-align:center; margin-bottom:24px; }
+  .auth-logo .logo-slot-auth { width:56px; height:56px; display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px; }
+  .auth-logo .logo-slot-auth svg, .auth-logo .logo-slot-auth img { width:56px; height:56px; object-fit:contain; }
+  .auth-logo h1 { font-size:1.45rem; font-weight:800; color:var(--forest); }
+  .auth-logo p { font-size:0.8rem; color:var(--text-soft); margin-top:3px; }
+  .auth-tabs { display:flex; background:var(--muted); border-radius:60px; padding:4px; margin-bottom:20px; gap:4px; }
+  .auth-tab { flex:1; text-align:center; padding:8px 0; border-radius:60px; font-size:0.8rem; font-weight:700; cursor:pointer; transition:0.2s; color:var(--text-soft); border:none; background:transparent; font-family:'Sora',sans-serif; }
+  .auth-tab.active { background:white; color:var(--forest); box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  /* Flèche de retour */
+  .back-home {
+    margin-top: 24px;
+    text-align: center;
+  }
+  .back-home a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--green-mid);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: 0.2s;
+  }
+  .back-home a:hover {
+    color: var(--accent);
+    transform: translateX(-3px);
+  }
+
+  /* FOOTER */
+  .footer { background:var(--forest); color:rgba(255,255,255,0.5); text-align:center; padding:12px 18px; font-size:0.72rem; position:fixed; bottom:0; left:0; right:0; z-index:100; }
+  .footer strong { color:rgba(255,255,255,0.8); }
+
+  /* GUIDE */
+  .guide-step { background:white; border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px 18px; display:flex; gap:14px; align-items:flex-start; margin-bottom:10px; transition:0.2s; }
+  .guide-step:hover { border-color:var(--green-mid); box-shadow:var(--shadow); }
+  .guide-step-num { width:34px; height:34px; background:var(--forest); border-radius:50%; color:white; font-size:0.8rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .guide-step-icon { width:34px; height:34px; background:var(--muted); border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--green-mid); flex-shrink:0; }
+  .guide-step-icon i[data-lucide] { width:17px; height:17px; }
+  .guide-step-title { font-weight:700; color:var(--forest); font-size:0.9rem; }
+  .guide-step-desc { font-size:0.8rem; color:var(--text-soft); margin-top:3px; line-height:1.5; }
+  .eudr-banner { background:linear-gradient(135deg,var(--forest),var(--green-mid)); border-radius:var(--radius-sm); padding:18px 20px; color:white; display:flex; align-items:center; gap:14px; margin-top:16px; }
+  .eudr-banner-icon { width:44px; height:44px; background:rgba(255,255,255,0.15); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .eudr-banner-icon i[data-lucide] { width:22px; height:22px; }
+  .eudr-banner-title { font-weight:800; font-size:0.95rem; }
+  .eudr-banner-desc { font-size:0.78rem; opacity:0.8; margin-top:3px; }
+
+  @media (max-width:700px) {
+    .content { padding:18px 14px 72px; }
+    .card { padding:18px 14px; }
+    .topbar { padding:0 14px; }
+    .nav-tabs { padding:0 10px; }
+    .topbar-user { display:none; }
+    .auth-box { padding:26px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-slot-auth">
+        <img src="logo.png" alt="Le logo">
+      </div>
+      <h1>ChainCacao</h1>
+      <p>Plateforme de traçabilité EUDR — Togo</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Se connecter</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">S'inscrire</button>
+    </div>
+
+    <div id="loginPanel">
+      <label>Numéro de téléphone</label>
+      <input type="tel" id="loginPhone" placeholder="+228 90 123 456">
+      <label>Mot de passe</label>
+      <input type="password" id="loginPassword" placeholder="••••••">
+      <button class="btn btn-primary" onclick="doLogin()">
+        <i data-lucide="log-in"></i> Se connecter
+      </button>
+      <div id="loginError"></div>
+    </div>
+
+    <div id="registerPanel" style="display:none;">
+      <div class="grid-2" style="gap:8px;">
+        <div><label>Nom</label><input type="text" id="regNom" placeholder="Nom"></div>
+        <div><label>Prénom</label><input type="text" id="regPrenom" placeholder="Prénom"></div>
+      </div>
+      <label>Téléphone</label>
+      <input type="tel" id="regPhone" placeholder="+228 90 123 456">
+      <label>Mot de passe</label>
+      <input type="password" id="regPassword" placeholder="Minimum 4 caractères">
+      <label>Rôle</label>
+      <select id="regRole">
+        <option value="agriculteur">Agriculteur</option>
+        <option value="cooperative">Coopérative</option>
+        <option value="exportateur">Exportateur</option>
+      </select>
+      <button class="btn btn-primary" onclick="doRegister()">
+        <i data-lucide="user-plus"></i> Créer mon compte
+      </button>
+      <div id="registerMsg"></div>
+    </div>
+
+    <!-- Flèche de retour vers l'accueil -->
+    <div class="back-home">
+      <a href="/">
+        <i data-lucide="arrow-left"></i> Retour à l'accueil
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen" style="display:none;">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="logo-slot">
+       <img src="logo.png" alt="Le logo">
+      </div>
+      ChainCacao
+      <a href="/" style="color: white; margin-left: 20px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+        <i data-lucide="home"></i> Accueil
+      </a>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="topbarUser"></span>
+      <span class="role-pill" id="topbarRole"></span>
+      <button class="topbar-logout" onclick="doLogout()">
+        <i data-lucide="log-out"></i> Déconnexion
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-tabs" id="navTabs"></div>
+  <div id="appPages" style="padding-bottom:56px;"></div>
+
+  <div class="footer">
+    <strong>ChainCacao</strong> — Conforme au règlement UE 2025 (EUDR) — Traçabilité géolocalisée — Togo
+  </div>
+</div>
+
+<script>
+/* ── STORAGE ── */
+const DB = {
+  getUsers: () => JSON.parse(localStorage.getItem('cc_users') || '[]'),
+  setUsers: u  => localStorage.setItem('cc_users', JSON.stringify(u)),
+  getLots:  () => JSON.parse(localStorage.getItem('cc_lots')  || '[]'),
+  setLots:  l  => localStorage.setItem('cc_lots',  JSON.stringify(l)),
+};
+
+/* ── SEED DATA ── */
+if (!DB.getUsers().length) {
+  DB.setUsers([
+    { id:1, phone:'+22890123456', password:'1234',   nom:'Koffi',      prenom:'Mensah', role:'agriculteur' },
+    { id:2, phone:'+22891111111', password:'coop',   nom:'COOPAC',     prenom:'Kloto',  role:'cooperative' },
+    { id:3, phone:'+22892222222', password:'export', nom:'TogoExport', prenom:'SARL',   role:'exportateur' },
+  ]);
+}
+if (!DB.getLots().length) {
+  DB.setLots([{
+    id:'CACAO-0001', espece:'Cacao Forastero', poidsInitial:245,
+    producteur:'Koffi Mensah', producteurPhone:'+22890123456',
+    cooperative:'COOPAC Kloto', gpsOrigine:'6.1372, 1.2123', dateRecolte:'2026-01-15',
+    imageSac:null,
+    historique:[{ etape:'Création récolte', acteur:'Koffi Mensah', poids:245, localisation:'6.1372, 1.2123', date:'2026-01-15T08:30:00Z', comment:'Récolte manuelle' }],
+    transformed:false, exported:false, derniereEtape:'Koffi Mensah', nouveauPoids:null
+  }]);
+}
+
+/* ── AUTH ── */
+let currentUser = null, currentTab = null;
+const norm = p => p.trim().replace(/[^0-9+]/g,'');
+
+function doLogin() {
+  const phone = norm(document.getElementById('loginPhone').value);
+  const pwd   = document.getElementById('loginPassword').value;
+  const user  = DB.getUsers().find(u => u.phone===phone && u.password===pwd);
+  if (!user) { showMsg('loginError','Numéro ou mot de passe incorrect.','error'); return; }
+  loginAs(user);
+}
+
+function doRegister() {
+  const nom    = document.getElementById('regNom').value.trim();
+  const prenom = document.getElementById('regPrenom').value.trim();
+  const phone  = norm(document.getElementById('regPhone').value);
+  const pwd    = document.getElementById('regPassword').value;
+  const role   = document.getElementById('regRole').value;
+  if (!nom||!prenom||!phone||!pwd) { showMsg('registerMsg','Tous les champs sont requis.','error'); return; }
+  const users = DB.getUsers();
+  if (users.find(u=>u.phone===phone)) { showMsg('registerMsg','Ce numéro est déjà utilisé.','error'); return; }
+  users.push({ id:Date.now(), phone, password:pwd, nom, prenom, role });
+  DB.setUsers(users);
+  showMsg('registerMsg','Compte créé ! Connectez-vous.','success');
+  setTimeout(()=>switchAuthTab('login'), 1200);
+}
+
+function loginAs(user) {
+  currentUser = user;
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display  = 'block';
+  document.getElementById('topbarUser').textContent = `${user.nom} ${user.prenom}`;
+  const labels = { agriculteur:'Agriculteur', cooperative:'Coopérative', exportateur:'Exportateur' };
+  document.getElementById('topbarRole').textContent = labels[user.role] || user.role;
+  renderRoleUI(user.role);
+  checkUrlLot();
+}
+
+function doLogout() {
+  currentUser = null;
+  window.location.href = '/';
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('loginPanel').style.display    = tab==='login'    ? 'block' : 'none';
+  document.getElementById('registerPanel').style.display = tab==='register' ? 'block' : 'none';
+  document.getElementById('tabLogin').classList.toggle('active',    tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+}
+
+/* ── NAVIGATION ── */
+function renderRoleUI(role) {
+  const defs = {
+    agriculteur:[
+      {id:'dash-agri',   icon:'layout-dashboard', label:'Tableau de bord'},
+      {id:'new-lot',     icon:'sprout',            label:'Nouvelle récolte'},
+      {id:'mes-lots',    icon:'package',           label:'Mes lots'},
+      {id:'guide',       icon:'info',              label:'Comment ça marche'},
+    ],
+    cooperative:[
+      {id:'dash-coop',   icon:'layout-dashboard', label:'Tableau de bord'},
+      {id:'transformer', icon:'refresh-cw',        label:'Transformer un lot'},
+      {id:'all-lots',    icon:'list',              label:'Tous les lots'},
+      {id:'guide',       icon:'info',              label:'Comment ça marche'},
+    ],
+    exportateur:[
+      {id:'dash-export', icon:'layout-dashboard', label:'Tableau de bord'},
+      {id:'exporter',    icon:'ship',              label:'Exporter un lot'},
+      {id:'verifier',    icon:'scan',              label:'Vérifier / Tracer'},
+      {id:'guide',       icon:'info',              label:'Comment ça marche'},
+    ],
+  };
+  const tabs = defs[role]||[];
+  document.getElementById('navTabs').innerHTML = tabs.map(t =>
+    `<div class="nav-tab" id="tab-${t.id}" onclick="showPage('${t.id}')"><i data-lucide="${t.icon}"></i>${t.label}</div>`
+  ).join('');
+  document.getElementById('appPages').innerHTML = tabs.map(t =>
+    `<div class="page content" id="page-${t.id}"></div>`
+  ).join('');
+  showPage(tabs[0].id);
+}
+
+function showPage(id) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const tab = document.getElementById(`tab-${id}`);
+  const page = document.getElementById(`page-${id}`);
+  if (tab) tab.classList.add('active');
+  if (page) { page.classList.add('active'); renderPage(id, page); }
+  currentTab = id;
+  setTimeout(()=>lucide.createIcons(), 60);
+}
+
+function renderPage(id, el) {
+  if      (id==='dash-agri')   renderDashAgri(el);
+  else if (id==='new-lot')     renderNewLot(el);
+  else if (id==='mes-lots')    renderMesLots(el);
+  else if (id==='dash-coop')   renderDashCoop(el);
+  else if (id==='transformer') renderTransformer(el);
+  else if (id==='all-lots')    renderAllLots(el);
+  else if (id==='dash-export') renderDashExport(el);
+  else if (id==='exporter')    renderExporter(el);
+  else if (id==='verifier')    renderVerifier(el);
+  else if (id==='guide')       renderGuide(el);
+}
+
+/* ── HELPERS ── */
+function showMsg(id, msg, type='info') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const c = {success:'alert-success',error:'alert-error',info:'alert-info',warn:'alert-warn'};
+  el.innerHTML = `<div class="alert ${c[type]||'alert-info'}">${msg}</div>`;
+  if (type==='success') setTimeout(()=>{el.innerHTML='';},3200);
+}
+
+function statCard(icon, val, label) {
+  return `<div class="stat-card">
+    <div class="stat-icon"><i data-lucide="${icon}"></i></div>
+    <div class="stat-value">${val}</div>
+    <div class="stat-label">${label}</div>
+  </div>`;
+}
+
+function lotBadge(lot) {
+  if (lot.exported)    return '<span class="badge badge-blue"><i data-lucide="ship"></i> Exporté</span>';
+  if (lot.transformed) return '<span class="badge badge-green"><i data-lucide="check-circle"></i> Transformé</span>';
+  return '<span class="badge badge-orange"><i data-lucide="clock"></i> En attente</span>';
+}
+
+function fmtDate(d) {
+  try { return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'}); } catch(e){return d;}
+}
+function fmtDT(d) {
+  try { return new Date(d).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch(e){return d;}
+}
+
+function timelineHtml(hist) {
+  if (!hist||!hist.length) return '<p style="color:var(--text-soft);font-size:0.82rem;">Aucun historique.</p>';
+  return `<div class="timeline">${hist.map(ev=>`
+    <div class="timeline-event">
+      <div class="timeline-step"><span class="badge badge-orange">${ev.etape}</span> — ${ev.acteur}</div>
+      <div class="timeline-detail">
+        <i data-lucide="calendar"></i> ${fmtDT(ev.date)}<br>
+        <i data-lucide="map-pin"></i> ${ev.localisation} &nbsp;|&nbsp; <i data-lucide="scale"></i> ${ev.poids} kg
+        ${ev.comment?`<br><i data-lucide="file-text"></i> ${ev.comment}`:''}
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+/* ── AGRICULTEUR ── */
+function renderDashAgri(el) {
+  const myLots = DB.getLots().filter(l=>l.producteurPhone===currentUser.phone);
+  const total = myLots.reduce((s,l)=>s+l.poidsInitial,0);
+  const obj=500, pct=Math.min(100,Math.round(total/obj*100));
+  el.innerHTML=`
+    <h2 style="font-size:1.3rem;font-weight:800;color:var(--forest);margin-bottom:22px;">Bonjour, ${currentUser.nom} ${currentUser.prenom}</h2>
+    <div class="grid-4" style="margin-bottom:22px;">
+      ${statCard('package',      myLots.length,                         'Lots enregistrés')}
+      ${statCard('scale',        total+' kg',                           'Poids total récolté')}
+      ${statCard('check-circle', myLots.filter(l=>l.transformed).length,'Lots transformés')}
+      ${statCard('ship',         myLots.filter(l=>l.exported).length,   'Lots exportés')}
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon-box green"><i data-lucide="target"></i></div>Progression saison</div>
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-soft);margin-bottom:6px;">
+        <span>Récolte actuelle : <strong>${total} kg</strong></span>
+        <span>Objectif : <strong>${obj} kg</strong></span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:0.78rem;color:var(--text-soft);margin-top:6px;">${pct}% de l'objectif atteint</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon-box"><i data-lucide="package"></i></div>Mes derniers lots</div>
+      ${myLots.length===0
+        ? `<div class="alert alert-info">Aucun lot enregistré. <a href="#" onclick="showPage('new-lot');return false;" style="color:var(--green-mid);font-weight:700;">Enregistrer une récolte</a></div>`
+        : myLots.slice(-5).reverse().map(l=>`
+          <div class="lot-item" onclick="showPage('mes-lots')">
+            <div><div><span class="lot-id">${l.id}</span></div><div class="lot-meta">${l.espece} — ${l.poidsInitial} kg — ${fmtDate(l.dateRecolte)}</div></div>
+            ${lotBadge(l)}
+          </div>`).join('')}
+    </div>`;
+}
+
+let _sacImageB64 = null;
+function renderNewLot(el) {
+  _sacImageB64 = null;
+  el.innerHTML=`
+    <div style="max-width:600px;margin:0 auto;">
+      <div class="card">
+        <div class="card-title"><div class="icon-box green"><i data-lucide="sprout"></i></div>Enregistrer une nouvelle récolte</div>
+        <label>Espèce</label>
+        <select id="nl_espece">
+          <option>Cacao Forastero</option><option>Cacao Criollo</option>
+          <option>Café Robusta</option><option>Café Arabica</option>
+        </select>
+        <label>Poids récolté (kg)</label>
+        <input type="number" id="nl_poids" value="100" step="0.1">
+        <label>Coordonnées GPS de la parcelle</label>
+        <div class="input-row">
+          <input type="text" id="nl_gps" placeholder="Ex : 6.1372, 1.2123" value="6.1372, 1.2123">
+          <button class="btn btn-outline btn-sm" onclick="getGps()"><i data-lucide="map-pin"></i>Position</button>
+        </div>
+        <label>Date de récolte</label>
+        <input type="date" id="nl_date" value="${new Date().toISOString().slice(0,10)}">
+        <label>Photo du sac (optionnel)</label>
+        <div class="img-upload-zone" onclick="document.getElementById('nl_img').click()">
+          <input type="file" id="nl_img" accept="image/*" onchange="previewSac(event)">
+          <div class="img-upload-icon"><i data-lucide="camera"></i></div>
+          <div class="img-upload-text" id="nl_img_txt">Cliquer pour ajouter une photo du sac</div>
+          <img id="nl_img_preview" class="img-preview">
+        </div>
+        <label>Notes (optionnel)</label>
+        <textarea id="nl_notes" placeholder="Méthode de récolte, conditions météo..."></textarea>
+        <button class="btn btn-primary" onclick="saveLot()"><i data-lucide="save"></i>Enregistrer le lot</button>
+        <div id="nl_msg"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="icon-box"><i data-lucide="info"></i></div>Information importante</div>
+        <div class="alert alert-info" style="margin-top:0;">
+          Après l'enregistrement, vous recevrez un <strong>identifiant unique</strong> à noter sur le sac.
+          La coopérative utilisera cet identifiant pour la transformation et la génération du QR code.
+        </div>
+      </div>
+    </div>`;
+  setTimeout(()=>lucide.createIcons(),60);
+}
+
+function previewSac(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    _sacImageB64 = ev.target.result;
+    const img = document.getElementById('nl_img_preview');
+    img.src = _sacImageB64; img.style.display='block';
+    document.getElementById('nl_img_txt').textContent = 'Photo sélectionnée — cliquer pour changer';
+  };
+  reader.readAsDataURL(file);
+}
+
+function getGps() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      p => { document.getElementById('nl_gps').value=`${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)}`; },
+      () => alert("Impossible d'obtenir la position GPS.")
+    );
+  }
+}
+
+function saveLot() {
+  const espece = document.getElementById('nl_espece').value;
+  const poids  = parseFloat(document.getElementById('nl_poids').value);
+  const gps    = document.getElementById('nl_gps').value.trim() || 'Non spécifié';
+  const date   = document.getElementById('nl_date').value;
+  const notes  = document.getElementById('nl_notes').value.trim();
+  if (!poids||poids<=0) { showMsg('nl_msg','Poids invalide.','error'); return; }
+  const lots = DB.getLots();
+  const newId = 'CACAO-'+String(lots.length+1).padStart(4,'0');
+  lots.push({
+    id:newId, espece, poidsInitial:poids,
+    producteur:`${currentUser.nom} ${currentUser.prenom}`,
+    producteurPhone:currentUser.phone,
+    cooperative: currentUser.cooperative||'COOPAC Kloto',
+    gpsOrigine:gps, dateRecolte:date,
+    imageSac:_sacImageB64||null,
+    historique:[{etape:'Création récolte',acteur:`${currentUser.nom} ${currentUser.prenom}`,poids,localisation:gps,date:new Date().toISOString(),comment:notes||`Récolte ${espece}`}],
+    transformed:false, exported:false,
+    derniereEtape:`${currentUser.nom} ${currentUser.prenom}`, nouveauPoids:null
+  });
+  DB.setLots(lots); _sacImageB64=null;
+  showMsg('nl_msg',`Lot enregistré. Identifiant : <strong>${newId}</strong> — À noter sur le sac.`,'success');
+  document.getElementById('nl_poids').value='100';
+  document.getElementById('nl_notes').value='';
+  document.getElementById('nl_img_preview').style.display='none';
+  document.getElementById('nl_img_txt').textContent='Cliquer pour ajouter une photo du sac';
+}
+
+function renderMesLots(el) {
+  const myLots = DB.getLots().filter(l=>l.producteurPhone===currentUser.phone);
+  el.innerHTML=`
+    <div class="card">
+      <div class="card-title"><div class="icon-box"><i data-lucide="package"></i></div>Mes lots (${myLots.length})</div>
+      ${!myLots.length?'<div class="alert alert-info">Aucun lot enregistré.</div>':
+        myLots.slice().reverse().map(l=>`
+          <div class="lot-item" onclick="toggleDetail('d-${l.id}')">
+            <div>
+              <div><span class="lot-id">${l.id}</span></div>
+              <div class="lot-meta">${l.espece} — ${l.poidsInitial} kg — ${fmtDate(l.dateRecolte)}</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">${lotBadge(l)}<i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--text-soft);"></i></div>
+          </div>
+          <div id="d-${l.id}" style="display:none;margin-bottom:12px;">
+            ${l.imageSac?`<img src="${l.imageSac}" style="width:100%;max-height:160px;object-fit:cover;border-radius:12px;margin-bottom:10px;">`:''}
+            <div class="result-box">
+              <div class="row"><span class="key">GPS origine</span><span class="val">${l.gpsOrigine}</span></div>
+              <div class="row"><span class="key">Coopérative</span><span class="val">${l.cooperative}</span></div>
+              <div class="row"><span class="key">Poids transformé</span><span class="val">${l.nouveauPoids||l.poidsInitial} kg</span></div>
+            </div>
+            ${timelineHtml(l.historique)}
+          </div>`).join('')}
+    </div>`;
+}
+
+function toggleDetail(id) {
+  const el = document.getElementById(id);
+  if (el) { el.style.display=el.style.display==='none'?'block':'none'; setTimeout(()=>lucide.createIcons(),40); }
+}
+
+/* ── COOPERATIVE ── */
+function renderDashCoop(el) {
+  const lots=DB.getLots(), total=lots.length;
+  const poids=lots.reduce((s,l)=>s+l.poidsInitial,0);
+  const transf=lots.filter(l=>l.transformed).length, attente=lots.filter(l=>!l.transformed).length;
+  el.innerHTML=`
+    <h2 style="font-size:1.3rem;font-weight:800;color:var(--forest);margin-bottom:22px;">Tableau de bord — ${currentUser.nom}</h2>
+    <div class="grid-4" style="margin-bottom:22px;">
+      ${statCard('package',      total,      'Lots enregistrés')}
+      ${statCard('scale',        poids+' kg','Poids total reçu')}
+      ${statCard('check-circle', transf,     'Lots transformés')}
+      ${statCard('clock',        attente,    'En attente')}
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon-box green"><i data-lucide="trending-up"></i></div>Taux de transformation</div>
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-soft);margin-bottom:6px;">
+        <span>Transformés : <strong>${transf}</strong> / <strong>${total}</strong></span>
+        <span>${total>0?Math.round(transf/total*100):0}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${total>0?Math.round(transf/total*100):0}%"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon-box"><i data-lucide="clock"></i></div>En attente de transformation (${attente})</div>
+      ${lots.filter(l=>!l.transformed).slice(0,5).map(l=>`
+        <div class="lot-item" onclick="showPage('transformer')">
+          <div><div><span class="lot-id">${l.id}</span></div><div class="lot-meta">${l.producteur} — ${l.poidsInitial} kg</div></div>
+          <span class="badge badge-orange"><i data-lucide="clock"></i> En attente</span>
+        </div>`).join('')||'<div class="alert alert-success">Tous les lots ont été transformés.</div>'}
+    </div>`;
+}
+
+function renderTransformer(el) {
+  el.innerHTML=`
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><div class="icon-box"><i data-lucide="search"></i></div>Rechercher un lot</div>
+        <label>Identifiant du lot</label>
+        <input type="text" id="tr_lotId" placeholder="Ex : CACAO-0001">
+        <button class="btn btn-primary" onclick="chargerLotCoop()"><i data-lucide="search"></i>Charger le lot</button>
+        <div id="tr_lotInfo"></div>
+        <div id="tr_form" style="display:none;">
+          <div class="divider">Paramètres de transformation</div>
+          <label>Nouveau poids après transformation (kg)</label>
+          <input type="number" id="tr_poids" placeholder="Laisser vide = poids initial">
+          <label>Lieu de transformation</label>
+          <input type="text" id="tr_lieu" value="Atelier Kloto">
+          <label>Procédé</label>
+          <input type="text" id="tr_comment" placeholder="Ex : Fermentation 5j + torréfaction">
+          <button class="btn btn-accent" onclick="doTransformerLot()"><i data-lucide="refresh-cw"></i>Transformer et générer QR code</button>
+          <div id="tr_msg"></div>
+        </div>
+        <div id="tr_qrArea" style="display:none;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="icon-box green"><i data-lucide="list"></i></div>Lots en attente</div>
+        ${DB.getLots().filter(l=>!l.transformed).map(l=>`
+          <div class="lot-item" onclick="document.getElementById('tr_lotId').value='${l.id}';chargerLotCoop();">
+            <div><div><span class="lot-id">${l.id}</span></div><div class="lot-meta">${l.producteur} — ${l.poidsInitial} kg</div></div>
+            <i data-lucide="arrow-right" style="width:15px;height:15px;color:var(--text-soft);"></i>
+          </div>`).join('')||'<div class="alert alert-success">Aucun lot en attente.</div>'}
+      </div>
+    </div>`;
+}
+
+let _coopLot = null;
+function chargerLotCoop() {
+  const id=document.getElementById('tr_lotId').value.trim();
+  const lot=DB.getLots().find(l=>l.id===id);
+  const info=document.getElementById('tr_lotInfo'), form=document.getElementById('tr_form'), qrEl=document.getElementById('tr_qrArea');
+  if (!lot) { info.innerHTML='<div class="alert alert-error">Lot introuvable.</div>'; form.style.display='none'; qrEl.style.display='none'; return; }
+  _coopLot=lot;
+  info.innerHTML=`
+    <div class="result-box" style="margin-top:10px;">
+      <div class="row"><span class="key">Identifiant</span><span class="val">${lot.id}</span></div>
+      <div class="row"><span class="key">Espèce</span><span class="val">${lot.espece}</span></div>
+      <div class="row"><span class="key">Producteur</span><span class="val">${lot.producteur}</span></div>
+      <div class="row"><span class="key">GPS origine</span><span class="val">${lot.gpsOrigine}</span></div>
+      <div class="row"><span class="key">Poids initial</span><span class="val">${lot.poidsInitial} kg</span></div>
+      <div class="row"><span class="key">Date récolte</span><span class="val">${fmtDate(lot.dateRecolte)}</span></div>
+      <div class="row"><span class="key">Statut</span><span class="val">${lotBadge(lot)}</span></div>
+    </div>`;
+  if (lot.transformed) {
+    form.style.display='none';
+    info.innerHTML+='<div class="alert alert-warn" style="margin-top:8px;">Lot déjà transformé. QR code ci-dessous.</div>';
+    showQrCode(lot.id, qrEl);
+  } else { form.style.display='block'; qrEl.style.display='none'; }
+  setTimeout(()=>lucide.createIcons(),40);
+}
+
+function doTransformerLot() {
+  if (!_coopLot) return;
+  const poids=parseFloat(document.getElementById('tr_poids').value)||_coopLot.poidsInitial;
+  const lieu=document.getElementById('tr_lieu').value.trim()||'Atelier coopérative';
+  const comment=document.getElementById('tr_comment').value.trim()||'Transformation effectuée';
+  const lots=DB.getLots(), lot=lots.find(l=>l.id===_coopLot.id);
+  if (!lot||lot.transformed) return;
+  lot.transformed=true; lot.nouveauPoids=poids; lot.derniereEtape=currentUser.nom;
+  lot.historique.push({etape:'Transformation',acteur:currentUser.nom,poids,localisation:lieu,date:new Date().toISOString(),comment});
+  DB.setLots(lots); _coopLot=lot;
+  document.getElementById('tr_form').style.display='none';
+  showMsg('tr_msg','Lot transformé. QR code généré ci-dessous.','success');
+  showQrCode(lot.id, document.getElementById('tr_qrArea'));
+}
+
+function showQrCode(lotId, container) {
+  container.style.display='block';
+  const safeId = lotId.replace(/-/g,'_');
+  container.innerHTML=`
+    <div class="qr-box">
+      <div style="font-weight:700;color:var(--forest);margin-bottom:12px;">QR Code de traçabilité</div>
+      <div id="qr_${safeId}"></div>
+      <p>Scanner pour la traçabilité complète (EUDR)</p>
+      <button class="btn btn-outline btn-sm" style="margin-top:12px;" onclick="imprimerQR('${lotId}')">
+        <i data-lucide="printer"></i>Imprimer le QR code
+      </button>
+    </div>`;
+  setTimeout(()=>{
+    const el=document.getElementById(`qr_${safeId}`);
+    if (el) new QRCode(el,{text:window.location.origin+window.location.pathname+'?lot='+lotId,width:160,height:160});
+    lucide.createIcons();
+  },80);
+}
+
+function imprimerQR(lotId) {
+  const lot=DB.getLots().find(l=>l.id===lotId);
+  if (!lot) return;
+  const url=window.location.origin+window.location.pathname+'?lot='+lotId;
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>QR — ${lotId}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#fff;padding:30px;}
+    .card{border:2px solid #1e3a1e;border-radius:16px;padding:30px 36px;text-align:center;max-width:320px;width:100%;}
+    .brand{font-size:1.1rem;font-weight:800;color:#1e3a1e;margin-bottom:2px;}
+    .sub{font-size:0.72rem;color:#2c5e2a;margin-bottom:16px;}
+    #pqr{display:flex;justify-content:center;margin:16px auto;}
+    .lot-id{font-family:monospace;font-size:0.9rem;font-weight:700;color:#1e3a1e;background:#eef3e6;padding:4px 12px;border-radius:40px;margin:10px auto;display:inline-block;}
+    .info{font-size:0.72rem;color:#4a6840;margin-top:12px;text-align:left;}
+    .info div{padding:3px 0;border-bottom:1px solid #eef3e6;}
+    .footer-txt{font-size:0.65rem;color:#aaa;margin-top:12px;}
+    .accent-bar{height:4px;background:#e67e22;border-radius:0 0 12px 12px;width:100%;margin-top:16px;}
+  </style></head>
+  <body>
+    <div class="card">
+      <div class="brand">ChainCacao</div>
+      <div class="sub">Traçabilité EUDR — Togo</div>
+      <div id="pqr"></div>
+      <div class="lot-id">${lot.id}</div>
+      <div class="info">
+        <div><strong>Espèce :</strong> ${lot.espece}</div>
+        <div><strong>GPS parcelle :</strong> ${lot.gpsOrigine}</div>
+      </div>
+      <div class="footer-txt">Scannez pour la traçabilité complète</div>
+      <div class="accent-bar"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>
+    <script>new QRCode(document.getElementById("pqr"),{text:"${url}",width:200,height:200});setTimeout(()=>window.print(),500);<\/script>
+  </body></html>`);
+  w.document.close();
+}
+
+function renderAllLots(el) {
+  const lots=DB.getLots();
+  el.innerHTML=`
+    <div class="card">
+      <div class="card-title"><div class="icon-box green"><i data-lucide="list"></i></div>Tous les lots (${lots.length})</div>
+      ${!lots.length?'<div class="alert alert-info">Aucun lot.</div>':
+        lots.slice().reverse().map(l=>`
+          <div class="lot-item" onclick="toggleDetail('al-${l.id}')">
+            <div><div><span class="lot-id">${l.id}</span><span class="lot-meta"> — ${l.producteur}</span></div>
+            <div class="lot-meta">${l.espece} — ${l.poidsInitial} kg — ${fmtDate(l.dateRecolte)}</div></div>
+            <div style="display:flex;gap:6px;align-items:center;">${lotBadge(l)}</div>
+          </div>
+          <div id="al-${l.id}" style="display:none;margin-bottom:12px;">${timelineHtml(l.historique)}</div>`).join('')}
+    </div>`;
+}
+
+/* ── EXPORTATEUR ── */
+function renderDashExport(el) {
+  const lots=DB.getLots();
+  const prets=lots.filter(l=>l.transformed&&!l.exported), exp=lots.filter(l=>l.exported);
+  const poidsExp=exp.reduce((s,l)=>s+(l.nouveauPoids||l.poidsInitial),0);
+  el.innerHTML=`
+    <h2 style="font-size:1.3rem;font-weight:800;color:var(--forest);margin-bottom:22px;">Tableau de bord — ${currentUser.nom}</h2>
+    <div class="grid-4" style="margin-bottom:22px;">
+      ${statCard('package-check',prets.length,  'Prêts à exporter')}
+      ${statCard('ship',         exp.length,    'Lots exportés')}
+      ${statCard('scale',        poidsExp+' kg','Poids exporté')}
+      ${statCard('shield-check', exp.length,    'Rapports EUDR')}
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon-box green"><i data-lucide="package-check"></i></div>Lots prêts à exporter (${prets.length})</div>
+      ${!prets.length?'<div class="alert alert-info">Aucun lot en attente d\'exportation.</div>':
+        prets.slice(0,5).map(l=>`
+          <div class="lot-item" onclick="showPage('exporter')">
+            <div><div><span class="lot-id">${l.id}</span></div><div class="lot-meta">${l.producteur} — ${l.nouveauPoids||l.poidsInitial} kg</div></div>
+            <span class="badge badge-green"><i data-lucide="check-circle"></i> Transformé</span>
+          </div>`).join('')}
+    </div>`;
+}
+
+function renderExporter(el) {
+  const prets=DB.getLots().filter(l=>l.transformed&&!l.exported);
+  el.innerHTML=`
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><div class="icon-box blue"><i data-lucide="ship"></i></div>Valider un export</div>
+        <label>Identifiant du lot</label>
+        <input type="text" id="ex_lotId" placeholder="Ex : CACAO-0001">
+        <button class="btn btn-primary" onclick="chargerLotExport()"><i data-lucide="search"></i>Charger le lot</button>
+        <div id="ex_lotInfo"></div>
+        <div id="ex_form" style="display:none;">
+          <div class="divider">Informations d'export</div>
+          <label>Numéro de conteneur</label>
+          <input type="text" id="ex_conteneur" placeholder="Ex : MSCU1234567">
+          <label>Port de départ</label>
+          <input type="text" id="ex_port" value="Port de Lomé">
+          <label>Pays de destination</label>
+          <input type="text" id="ex_dest" value="France">
+          <button class="btn btn-accent" onclick="validerExport()"><i data-lucide="check-circle"></i>Valider + Rapport EUDR</button>
+          <div id="ex_msg"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="icon-box green"><i data-lucide="package-check"></i></div>Lots prêts (${prets.length})</div>
+        ${!prets.length?'<div class="alert alert-success">Tous les lots ont été exportés.</div>':
+          prets.map(l=>`
+            <div class="lot-item" onclick="document.getElementById('ex_lotId').value='${l.id}';chargerLotExport();">
+              <div><div><span class="lot-id">${l.id}</span></div><div class="lot-meta">${l.producteur} — ${l.nouveauPoids||l.poidsInitial} kg</div></div>
+              <i data-lucide="arrow-right" style="width:15px;height:15px;color:var(--text-soft);"></i>
+            </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+let _exportLot=null;
+function chargerLotExport() {
+  const id=document.getElementById('ex_lotId').value.trim();
+  const lot=DB.getLots().find(l=>l.id===id);
+  const info=document.getElementById('ex_lotInfo'), form=document.getElementById('ex_form');
+  if (!lot) { info.innerHTML='<div class="alert alert-error">Lot introuvable.</div>'; form.style.display='none'; return; }
+  if (!lot.transformed) { info.innerHTML='<div class="alert alert-warn">Lot non encore transformé.</div>'; form.style.display='none'; return; }
+  _exportLot=lot;
+  info.innerHTML=`
+    <div class="result-box" style="margin-top:10px;">
+      <div class="row"><span class="key">Identifiant</span><span class="val">${lot.id}</span></div>
+      <div class="row"><span class="key">Producteur</span><span class="val">${lot.producteur}</span></div>
+      <div class="row"><span class="key">Espèce</span><span class="val">${lot.espece}</span></div>
+      <div class="row"><span class="key">GPS origine</span><span class="val">${lot.gpsOrigine}</span></div>
+      <div class="row"><span class="key">Poids transformé</span><span class="val">${lot.nouveauPoids||lot.poidsInitial} kg</span></div>
+      <div class="row"><span class="key">Statut</span><span class="val">${lot.exported?'<span class="badge badge-blue">Déjà exporté</span>':'<span class="badge badge-green">Prêt</span>'}</span></div>
+    </div>`;
+  form.style.display=lot.exported?'none':'block';
+  if (lot.exported) info.innerHTML+='<div class="alert alert-warn" style="margin-top:8px;">Ce lot a déjà été exporté.</div>';
+  setTimeout(()=>lucide.createIcons(),40);
+}
+
+function validerExport() {
+  if (!_exportLot) return;
+  const cont=document.getElementById('ex_conteneur').value.trim();
+  const port=document.getElementById('ex_port').value.trim()||'Port de Lomé';
+  const dest=document.getElementById('ex_dest').value.trim()||'Europe';
+  if (!cont) { showMsg('ex_msg','Le numéro de conteneur est obligatoire.','error'); return; }
+  const lots=DB.getLots(), lot=lots.find(l=>l.id===_exportLot.id);
+  lot.exported=true; lot.derniereEtape=currentUser.nom;
+  lot.historique.push({etape:'Export maritime',acteur:currentUser.nom,poids:lot.nouveauPoids||lot.poidsInitial,localisation:port,date:new Date().toISOString(),comment:`Conteneur ${cont} — Destination : ${dest}`});
+  DB.setLots(lots);
+  showMsg('ex_msg','Export validé. Génération du rapport EUDR...','success');
+  document.getElementById('ex_form').style.display='none';
+  setTimeout(()=>genererRapportEUDR(lot),600);
+}
+
+/* ── VERIFIER ── */
+let _verifiedLot = null;
+
+function renderVerifier(el) {
+  _verifiedLot = null;
+  el.innerHTML = '<div class="card" style="max-width:700px;margin:0 auto;">' +
+    '<div class="card-title"><div class="icon-box purple"><i data-lucide="scan"></i></div>Vérification et traçabilité (EUDR)</div>' +
+    '<p style="font-size:0.74rem;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;margin-top:14px;">Identifiant du lot</p>' +
+    '<div id="vf_search_row" style="display:flex;gap:8px;align-items:stretch;width:100%;"></div>' +
+    '<div id="vf_result" style="margin-top:14px;"></div>' +
+    '<div id="vf_btn"></div>' +
+    '</div>';
+
+  const row = document.getElementById('vf_search_row');
+
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.id = 'vf_id';
+  inp.placeholder = 'Ex : CACAO-0001';
+  inp.autocomplete = 'off';
+  inp.spellcheck = false;
+  inp.style.cssText = 'flex:1 1 auto;width:auto;min-width:0;padding:10px 16px;border-radius:60px;border:1.5px solid #d4e0c8;background:#fafcf5;font-size:0.88rem;font-family:Sora,sans-serif;color:#1e3a1e;box-sizing:border-box;';
+  row.appendChild(inp);
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.onclick = verifierLot;
+  btn.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:60px;border:none;background:#2c5e2a;color:white;font-family:Sora,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;';
+  btn.innerHTML = '<i data-lucide="search" style="width:15px;height:15px;"></i>Vérifier';
+  row.appendChild(btn);
+
+  setTimeout(()=>{
+    inp.disabled = false;
+    inp.readOnly = false;
+    inp.focus();
+    lucide.createIcons();
+  }, 150);
+}
+
+function verifierLot() {
+  const id=document.getElementById('vf_id').value.trim();
+  const lot=DB.getLots().find(l=>l.id===id);
+  const res=document.getElementById('vf_result'), btn=document.getElementById('vf_btn');
+  if (!lot) { res.innerHTML='<div class="alert alert-error">Aucun lot trouvé avec cet identifiant.</div>'; btn.innerHTML=''; _verifiedLot=null; return; }
+
+  _verifiedLot = lot;
+
+  res.innerHTML=`
+    <div class="result-box">
+      <div class="row"><span class="key">Identifiant</span><span class="val"><span class="lot-id">${lot.id}</span></span></div>
+      <div class="row"><span class="key">Espèce</span><span class="val">${lot.espece}</span></div>
+      <div class="row"><span class="key">Producteur</span><span class="val">${lot.producteur}</span></div>
+      <div class="row"><span class="key">Coopérative</span><span class="val">${lot.cooperative}</span></div>
+      <div class="row"><span class="key">GPS parcelle</span><span class="val">${lot.gpsOrigine}</span></div>
+      <div class="row"><span class="key">Date récolte</span><span class="val">${fmtDate(lot.dateRecolte)}</span></div>
+      <div class="row"><span class="key">Poids initial</span><span class="val">${lot.poidsInitial} kg</span></div>
+      <div class="row"><span class="key">Transformé</span><span class="val">${lot.transformed?'<span class="badge badge-green">Oui</span>':'<span class="badge badge-orange">Non</span>'}</span></div>
+      <div class="row"><span class="key">Exporté</span><span class="val">${lot.exported?'<span class="badge badge-blue">Oui</span>':'<span class="badge badge-gray">Non</span>'}</span></div>
+    </div>
+    <div class="divider" style="margin-top:16px;">Historique de traçabilité</div>
+    ${timelineHtml(lot.historique)}
+    <div class="qr-box" style="margin-top:14px;">
+      <div style="font-weight:700;color:var(--forest);margin-bottom:10px;">QR code de traçabilité</div>
+      <div id="vf_qr"></div>
+      <p>Partageable avec les importateurs pour vérification EUDR</p>
+    </div>`;
+
+  setTimeout(()=>{
+    const qrEl=document.getElementById('vf_qr');
+    if (qrEl) new QRCode(qrEl,{text:window.location.origin+window.location.pathname+'?lot='+lot.id,width:140,height:140});
+    lucide.createIcons();
+  },60);
+
+  btn.innerHTML=`<button class="btn btn-accent btn-full" style="margin-top:12px;" onclick="genererRapportVerifie()"><i data-lucide="file-text"></i>Télécharger le rapport EUDR (PDF)</button>`;
+  setTimeout(()=>lucide.createIcons(),80);
+}
+
+function genererRapportVerifie() {
+  if (_verifiedLot) genererRapportEUDR(_verifiedLot);
+}
+
+/* ── PDF ── */
+function genererRapportEUDR(lot) {
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  const GR=[30,58,30], ACC=[230,126,34], W=[255,255,255], LG=[238,243,230], GS=[74,104,64];
+
+  doc.setFillColor(...GR); doc.rect(0,0,210,46,'F');
+  doc.setFillColor(...ACC); doc.rect(0,42,210,4,'F');
+  doc.setTextColor(...W);
+  doc.setFontSize(22); doc.setFont(undefined,'bold');
+  doc.text('ChainCacao', 15, 18);
+  doc.setFontSize(10); doc.setFont(undefined,'normal');
+  doc.text('Rapport de traçabilité conforme au Règlement EUDR (UE 2023/1115)', 15, 28);
+  const now=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  doc.setFontSize(8);
+  doc.text(`Généré le ${now}`, 15, 36);
+
+  doc.setFillColor(255,248,236);
+  doc.roundedRect(130,12,68,24,4,4,'F');
+  doc.setTextColor(...ACC); doc.setFontSize(7); doc.setFont(undefined,'bold');
+  doc.text('IDENTIFIANT DU LOT', 164,19,{align:'center'});
+  doc.setFontSize(11); doc.setTextColor(...GR);
+  doc.text(lot.id, 164,29,{align:'center'});
+
+  let y=58;
+  doc.setFillColor(...LG); doc.rect(10,y,190,8,'F');
+  doc.setDrawColor(...GR); doc.rect(10,y,190,8,'S');
+  doc.setTextColor(...GR); doc.setFontSize(9); doc.setFont(undefined,'bold');
+  doc.text('INFORMATIONS DU LOT', 14, y+5.5);
+  y+=14;
+
+  const fields=[
+    ['Espèce / Variété', lot.espece],
+    ['Producteur', lot.producteur],
+    ['Téléphone producteur', lot.producteurPhone||'N/A'],
+    ['Coopérative', lot.cooperative],
+    ['Coordonnées GPS (parcelle)', lot.gpsOrigine],
+    ['Date de récolte', fmtDate(lot.dateRecolte)],
+    ['Poids initial récolté', `${lot.poidsInitial} kg`],
+    ['Poids après transformation', `${lot.nouveauPoids||lot.poidsInitial} kg`],
+    ['Lot transformé', lot.transformed?'Oui':'Non'],
+    ['Lot exporté', lot.exported?'Oui':'Non'],
+  ];
+
+  doc.setFontSize(9);
+  fields.forEach(([k,v],i)=>{
+    if (y>275){doc.addPage();y=20;}
+    if (i%2===0){doc.setFillColor(248,252,246);doc.rect(10,y-5,190,8,'F');}
+    doc.setTextColor(...GS); doc.setFont(undefined,'normal'); doc.text(k, 14, y);
+    doc.setTextColor(...GR); doc.setFont(undefined,'bold'); doc.text(String(v), 120, y);
+    doc.setDrawColor(220,230,215); doc.line(10,y+2,200,y+2);
+    y+=9;
+  });
+
+  y+=4;
+  if (y>250){doc.addPage();y=20;}
+  doc.setFillColor(...LG); doc.rect(10,y,190,8,'F');
+  doc.setDrawColor(...GR); doc.rect(10,y,190,8,'S');
+  doc.setTextColor(...GR); doc.setFontSize(9); doc.setFont(undefined,'bold');
+  doc.text('HISTORIQUE COMPLET DE TRAÇABILITÉ', 14, y+5.5);
+  y+=14;
+
+  lot.historique.forEach((ev,i)=>{
+    if (y>265){doc.addPage();y=20;}
+    doc.setFillColor(...ACC); doc.circle(15.5,y,4,'F');
+    doc.setTextColor(...W); doc.setFontSize(7.5); doc.setFont(undefined,'bold');
+    doc.text(String(i+1), 15.5, y+1, {align:'center'});
+    doc.setTextColor(...GR); doc.setFontSize(9.5); doc.setFont(undefined,'bold');
+    doc.text(`${ev.etape}`, 23, y);
+    doc.setFontSize(8.5); doc.setFont(undefined,'normal'); doc.setTextColor(...GS);
+    doc.text(`Acteur : ${ev.acteur}`, 80, y);
+    y+=7;
+    doc.setFontSize(8); doc.setTextColor(...GS); doc.setFont(undefined,'normal');
+    doc.text(`Date : ${fmtDT(ev.date)}`, 23, y); y+=5.5;
+    doc.text(`Localisation : ${ev.localisation}`, 23, y); y+=5.5;
+    doc.text(`Poids : ${ev.poids} kg`, 23, y); y+=5.5;
+    if (ev.comment){doc.text(`Commentaire : ${ev.comment}`, 23, y); y+=5.5;}
+    doc.setDrawColor(220,230,215); doc.line(23,y,195,y); y+=5;
+  });
+
+  if (y>252){doc.addPage();y=20;}
+  y+=4;
+  doc.setFillColor(...GR); doc.rect(10,y,190,26,'F');
+  doc.setFillColor(...ACC); doc.rect(10,y,4,26,'F');
+  doc.setTextColor(...W); doc.setFontSize(9); doc.setFont(undefined,'bold');
+  doc.text('CERTIFICATION DE CONFORMITÉ EUDR', 18, y+8);
+  doc.setFontSize(7.5); doc.setFont(undefined,'normal');
+  doc.text('Ce document certifie que la traçabilité géographique du lot est complète et que le produit', 18, y+15);
+  doc.text('est conforme au Règlement (UE) 2023/1115 relatif à la déforestation (EUDR), applicable depuis 2025.', 18, y+21);
+
+  doc.save(`ChainCacao_EUDR_${lot.id}.pdf`);
+}
+
+/* ── GUIDE ── */
+function renderGuide(el) {
+  el.innerHTML=`
+    <div class="card" style="max-width:780px;margin:0 auto;">
+      <div class="card-title"><div class="icon-box"><i data-lucide="info"></i></div>Comment fonctionne ChainCacao ?</div>
+      <p style="color:var(--text-soft);font-size:0.85rem;margin-bottom:20px;line-height:1.65;">
+        ChainCacao trace chaque lot de cacao depuis la parcelle agricole jusqu'à l'exportation vers l'Union Européenne,
+        garantissant la conformité au règlement EUDR (UE 2023/1115, applicable 2025).
+      </p>
+      <div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-icon"><i data-lucide="sprout"></i></div><div><div class="guide-step-title">Agriculteur — Enregistrement de la récolte</div><div class="guide-step-desc">L'agriculteur enregistre son lot avec les coordonnées GPS de sa parcelle, le poids récolté, la date et une photo optionnelle du sac. Un identifiant unique est généré à noter sur le sac.</div></div></div>
+      <div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-icon"><i data-lucide="building-2"></i></div><div><div class="guide-step-title">Coopérative — Transformation et QR code</div><div class="guide-step-desc">La coopérative saisit l'identifiant du lot, effectue la transformation (fermentation, torréfaction...) et génère un QR code imprimable à coller sur le sac.</div></div></div>
+      <div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-icon"><i data-lucide="ship"></i></div><div><div class="guide-step-title">Exportateur — Validation et rapport EUDR</div><div class="guide-step-desc">L'exportateur scanne le QR ou saisit l'identifiant, vérifie la chaîne complète, enregistre le conteneur et génère le rapport PDF certifié EUDR.</div></div></div>
+      <div class="guide-step"><div class="guide-step-num">4</div><div class="guide-step-icon"><i data-lucide="globe"></i></div><div><div class="guide-step-title">Importateur UE — Vérification</div><div class="guide-step-desc">L'importateur scanne le QR code pour accéder à l'intégralité de la traçabilité géographique et confirmer la conformité EUDR avant mise sur le marché européen.</div></div></div>
+      <div class="eudr-banner"><div class="eudr-banner-icon"><i data-lucide="shield-check"></i></div><div><div class="eudr-banner-title">Conformité EUDR garantie</div><div class="eudr-banner-desc">GPS d'origine — Horodatage immuable — Historique complet — Rapport PDF certifié</div></div></div>
+    </div>`;
+  setTimeout(()=>lucide.createIcons(),60);
+}
+
+function checkUrlLot() {
+  const id=new URLSearchParams(window.location.search).get('lot');
+  if (!id||!currentUser) return;
+  if (currentUser.role==='exportateur') {
+    showPage('verifier');
+    setTimeout(()=>{ const el=document.getElementById('vf_id'); if(el){el.value=id;verifierLot();} },400);
+  } else if (currentUser.role==='cooperative') {
+    showPage('transformer');
+    setTimeout(()=>{ const el=document.getElementById('tr_lotId'); if(el){el.value=id;chargerLotCoop();} },400);
+  }
+}
+
+lucide.createIcons();
+setInterval(()=>lucide.createIcons(), 500);
+</script>
+</body>
+</html>
