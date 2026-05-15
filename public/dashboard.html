@@ -149,36 +149,80 @@
   .img-upload-text { font-size:0.78rem; color:var(--text-soft); font-weight:600; }
   .img-preview { width:100%; max-height:140px; object-fit:cover; border-radius:10px; margin-top:10px; display:none; }
 
-  /* AUTH */
-  #authScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:#eef3e6; padding:24px; }
-  .auth-box { background:white; border-radius:var(--radius); padding:36px 32px; width:100%; max-width:420px; box-shadow:0 8px 20px rgba(0,0,0,0.08); border:1px solid var(--border); border-top:4px solid var(--accent); position:relative; }
+  /* AUTH (avec navbar) */
+  #authScreen {
+    min-height: 100vh;
+    background: var(--cream);
+    display: flex;
+    flex-direction: column;
+  }
+  .auth-navbar {
+    background: var(--forest);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  .auth-logo-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: white;
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+  .auth-logo-link img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+  }
+  .auth-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,240,0.12);
+    border: 1px solid rgba(255,215,140,0.5);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s;
+  }
+  .auth-nav-link:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .auth-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .auth-box {
+    background: white;
+    border-radius: var(--radius);
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--accent);
+  }
   .auth-logo { text-align:center; margin-bottom:24px; }
   .auth-logo .logo-slot-auth { width:56px; height:56px; display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px; }
-  .auth-logo .logo-slot-auth svg, .auth-logo .logo-slot-auth img { width:56px; height:56px; object-fit:contain; }
+  .auth-logo .logo-slot-auth img { width:56px; height:56px; object-fit:contain; }
   .auth-logo h1 { font-size:1.45rem; font-weight:800; color:var(--forest); }
   .auth-logo p { font-size:0.8rem; color:var(--text-soft); margin-top:3px; }
   .auth-tabs { display:flex; background:var(--muted); border-radius:60px; padding:4px; margin-bottom:20px; gap:4px; }
   .auth-tab { flex:1; text-align:center; padding:8px 0; border-radius:60px; font-size:0.8rem; font-weight:700; cursor:pointer; transition:0.2s; color:var(--text-soft); border:none; background:transparent; font-family:'Sora',sans-serif; }
   .auth-tab.active { background:white; color:var(--forest); box-shadow:0 2px 8px rgba(0,0,0,0.1); }
-  /* Flèche de retour */
-  .back-home {
-    margin-top: 24px;
-    text-align: center;
-  }
-  .back-home a {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--green-mid);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: 0.2s;
-  }
-  .back-home a:hover {
-    color: var(--accent);
-    transform: translateX(-3px);
-  }
 
   /* FOOTER */
   .footer { background:var(--forest); color:rgba(255,255,255,0.5); text-align:center; padding:12px 18px; font-size:0.72rem; position:fixed; bottom:0; left:0; right:0; z-index:100; }
@@ -198,6 +242,29 @@
   .eudr-banner-title { font-weight:800; font-size:0.95rem; }
   .eudr-banner-desc { font-size:0.78rem; opacity:0.8; margin-top:3px; }
 
+  /* Styles pour l'outil déforestation */
+  .coord-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; }
+  .coord-field { flex:1; min-width:180px; }
+  .coord-field input { width:100%; padding:0.8rem 1rem; border:1.5px solid #dde5d4; border-radius:1.5rem; font-size:0.9rem; font-family:'Space Mono',monospace; background:#fefef9; }
+  .hint { display:flex; align-items:center; gap:0.3rem; font-size:0.7rem; color:#6f8f63; margin-top:0.4rem; }
+  .result-card { margin-top:1.5rem; background:#fcfdf9; border-radius:1.5rem; border:1px solid #e2ecd9; overflow:hidden; }
+  .result-header { background:#f4f9ef; padding:0.85rem 1.5rem; border-bottom:1px solid #e2ecd9; display:flex; align-items:center; gap:0.6rem; font-weight:700; font-size:0.75rem; text-transform:uppercase; color:#4a6840; }
+  .result-body { padding:1.5rem; }
+  .address { font-size:1.2rem; font-weight:700; color:#1a3a1a; margin-bottom:1rem; }
+  .tags { display:flex; flex-wrap:wrap; gap:0.6rem; margin-bottom:1.2rem; }
+  .tag { display:inline-flex; align-items:center; gap:0.4rem; background:white; border:1px solid #d4e0c8; border-radius:2rem; padding:0.25rem 1rem; font-size:0.75rem; font-weight:600; color:#2c5e2a; }
+  .coord-panel { display:flex; flex-wrap:wrap; gap:1rem; background:#f1f6ec; padding:0.75rem 1rem; border-radius:1rem; font-family:monospace; font-size:0.75rem; color:#4e6e41; margin-bottom:1.2rem; }
+  .coord-panel span { display:inline-flex; align-items:center; gap:0.4rem; }
+  .deforestation-status { padding:1rem 1.2rem; border-radius:1rem; font-size:0.9rem; line-height:1.4; border-left:4px solid; }
+  .status-safe { background:#e6f3e6; border-left-color:#2c5e2a; }
+  .status-warning { background:#fff0e0; border-left-color:#e67e22; }
+  .status-danger { background:#ffe8e8; border-left-color:#c0392b; }
+  .status-info { background:#eef3e6; border-left-color:#6f8f63; }
+  .zone-ref { margin-top:0.6rem; font-size:0.7rem; display:flex; align-items:center; gap:0.4rem; }
+  .loader { display:inline-flex; align-items:center; gap:0.5rem; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
   @media (max-width:700px) {
     .content { padding:18px 14px 72px; }
     .card { padding:18px 14px; }
@@ -205,64 +272,62 @@
     .nav-tabs { padding:0 10px; }
     .topbar-user { display:none; }
     .auth-box { padding:26px 18px; }
+    .coord-row { flex-direction: column; gap:0.8rem; }
   }
 </style>
 </head>
 <body>
 
-<!-- AUTH -->
+<!-- AUTH (avec navbar) -->
 <div id="authScreen">
-  <div class="auth-box">
-    <div class="auth-logo">
-      <div class="logo-slot-auth">
-        <img src="logo.png" alt="Le logo">
+  <div class="auth-navbar">
+    <a href="/" class="auth-logo-link">
+      <img src="../src/assets/logo.png" alt="Logo ChainCacao">
+      <span>ChainCacao</span>
+    </a>
+    <a href="/" class="auth-nav-link">
+      <i data-lucide="home"></i> Retour à l'accueil
+    </a>
+  </div>
+  <div class="auth-container">
+    <div class="auth-box">
+      <div class="auth-logo">
+        <div class="logo-slot-auth">
+          <img src="../src/assets/logo.png" alt="Logo">
+        </div>
+        <h1>ChainCacao</h1>
+        <p>Plateforme de traçabilité EUDR — Togo</p>
       </div>
-      <h1>ChainCacao</h1>
-      <p>Plateforme de traçabilité EUDR — Togo</p>
-    </div>
-
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Se connecter</button>
-      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">S'inscrire</button>
-    </div>
-
-    <div id="loginPanel">
-      <label>Numéro de téléphone</label>
-      <input type="tel" id="loginPhone" placeholder="+228 90 123 456">
-      <label>Mot de passe</label>
-      <input type="password" id="loginPassword" placeholder="••••••">
-      <button class="btn btn-primary" onclick="doLogin()">
-        <i data-lucide="log-in"></i> Se connecter
-      </button>
-      <div id="loginError"></div>
-    </div>
-
-    <div id="registerPanel" style="display:none;">
-      <div class="grid-2" style="gap:8px;">
-        <div><label>Nom</label><input type="text" id="regNom" placeholder="Nom"></div>
-        <div><label>Prénom</label><input type="text" id="regPrenom" placeholder="Prénom"></div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Se connecter</button>
+        <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">S'inscrire</button>
       </div>
-      <label>Téléphone</label>
-      <input type="tel" id="regPhone" placeholder="+228 90 123 456">
-      <label>Mot de passe</label>
-      <input type="password" id="regPassword" placeholder="Minimum 4 caractères">
-      <label>Rôle</label>
-      <select id="regRole">
-        <option value="agriculteur">Agriculteur</option>
-        <option value="cooperative">Coopérative</option>
-        <option value="exportateur">Exportateur</option>
-      </select>
-      <button class="btn btn-primary" onclick="doRegister()">
-        <i data-lucide="user-plus"></i> Créer mon compte
-      </button>
-      <div id="registerMsg"></div>
-    </div>
-
-    <!-- Flèche de retour vers l'accueil -->
-    <div class="back-home">
-      <a href="/">
-        <i data-lucide="arrow-left"></i> Retour à l'accueil
-      </a>
+      <div id="loginPanel">
+        <label>Numéro de téléphone</label>
+        <input type="tel" id="loginPhone" placeholder="+228 90 123 456">
+        <label>Mot de passe</label>
+        <input type="password" id="loginPassword" placeholder="••••••">
+        <button class="btn btn-primary" onclick="doLogin()"><i data-lucide="log-in"></i> Se connecter</button>
+        <div id="loginError"></div>
+      </div>
+      <div id="registerPanel" style="display:none;">
+        <div class="grid-2" style="gap:8px;">
+          <div><label>Nom</label><input type="text" id="regNom" placeholder="Nom"></div>
+          <div><label>Prénom</label><input type="text" id="regPrenom" placeholder="Prénom"></div>
+        </div>
+        <label>Téléphone</label>
+        <input type="tel" id="regPhone" placeholder="+228 90 123 456">
+        <label>Mot de passe</label>
+        <input type="password" id="regPassword" placeholder="Minimum 4 caractères">
+        <label>Rôle</label>
+        <select id="regRole">
+          <option value="agriculteur">Agriculteur</option>
+          <option value="cooperative">Coopérative</option>
+          <option value="exportateur">Exportateur</option>
+        </select>
+        <button class="btn btn-primary" onclick="doRegister()"><i data-lucide="user-plus"></i> Créer mon compte</button>
+        <div id="registerMsg"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -271,29 +336,19 @@
 <div id="appScreen" style="display:none;">
   <div class="topbar">
     <div class="topbar-brand">
-      <div class="logo-slot">
-       <img src="logo.png" alt="Le logo">
-      </div>
+      <div class="logo-slot"><img src="../src/assets/logo.png" alt="Logo"></div>
       ChainCacao
-      <a href="/" style="color: white; margin-left: 20px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-        <i data-lucide="home"></i> Accueil
-      </a>
+      <a href="/" style="color: white; margin-left: 20px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i data-lucide="home"></i> Accueil</a>
     </div>
     <div class="topbar-right">
       <span class="topbar-user" id="topbarUser"></span>
       <span class="role-pill" id="topbarRole"></span>
-      <button class="topbar-logout" onclick="doLogout()">
-        <i data-lucide="log-out"></i> Déconnexion
-      </button>
+      <button class="topbar-logout" onclick="doLogout()"><i data-lucide="log-out"></i> Déconnexion</button>
     </div>
   </div>
-
   <div class="nav-tabs" id="navTabs"></div>
   <div id="appPages" style="padding-bottom:56px;"></div>
-
-  <div class="footer">
-    <strong>ChainCacao</strong> — Conforme au règlement UE 2025 (EUDR) — Traçabilité géolocalisée — Togo
-  </div>
+  <div class="footer"><strong>ChainCacao</strong> — Conforme au règlement UE 2025 (EUDR) — Traçabilité géolocalisée — Togo</div>
 </div>
 
 <script>
@@ -368,9 +423,9 @@ function doLogout() {
 }
 
 function switchAuthTab(tab) {
-  document.getElementById('loginPanel').style.display    = tab==='login'    ? 'block' : 'none';
+  document.getElementById('loginPanel').style.display    = tab==='login' ? 'block' : 'none';
   document.getElementById('registerPanel').style.display = tab==='register' ? 'block' : 'none';
-  document.getElementById('tabLogin').classList.toggle('active',    tab==='login');
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
   document.getElementById('tabRegister').classList.toggle('active', tab==='register');
 }
 
@@ -378,22 +433,23 @@ function switchAuthTab(tab) {
 function renderRoleUI(role) {
   const defs = {
     agriculteur:[
-      {id:'dash-agri',   icon:'layout-dashboard', label:'Tableau de bord'},
-      {id:'new-lot',     icon:'sprout',            label:'Nouvelle récolte'},
-      {id:'mes-lots',    icon:'package',           label:'Mes lots'},
-      {id:'guide',       icon:'info',              label:'Comment ça marche'},
+      {id:'dash-agri', icon:'layout-dashboard', label:'Tableau de bord'},
+      {id:'new-lot',   icon:'sprout',           label:'Nouvelle récolte'},
+      {id:'mes-lots',  icon:'package',          label:'Mes lots'},
+      {id:'guide',     icon:'info',             label:'Comment ça marche'},
     ],
     cooperative:[
       {id:'dash-coop',   icon:'layout-dashboard', label:'Tableau de bord'},
-      {id:'transformer', icon:'refresh-cw',        label:'Transformer un lot'},
-      {id:'all-lots',    icon:'list',              label:'Tous les lots'},
-      {id:'guide',       icon:'info',              label:'Comment ça marche'},
+      {id:'transformer', icon:'refresh-cw',       label:'Transformer un lot'},
+      {id:'all-lots',    icon:'list',             label:'Tous les lots'},
+      {id:'guide',       icon:'info',             label:'Comment ça marche'},
     ],
     exportateur:[
       {id:'dash-export', icon:'layout-dashboard', label:'Tableau de bord'},
-      {id:'exporter',    icon:'ship',              label:'Exporter un lot'},
-      {id:'verifier',    icon:'scan',              label:'Vérifier / Tracer'},
-      {id:'guide',       icon:'info',              label:'Comment ça marche'},
+      {id:'exporter',    icon:'ship',             label:'Exporter un lot'},
+      {id:'verifier',    icon:'scan',             label:'Vérifier / Tracer'},
+      {id:'deforestation-check', icon:'leaf',     label:'Conformité déforestation'},
+      {id:'guide',       icon:'info',             label:'Comment ça marche'},
     ],
   };
   const tabs = defs[role]||[];
@@ -427,6 +483,7 @@ function renderPage(id, el) {
   else if (id==='dash-export') renderDashExport(el);
   else if (id==='exporter')    renderExporter(el);
   else if (id==='verifier')    renderVerifier(el);
+  else if (id==='deforestation-check') renderDeforestationCheck(el);
   else if (id==='guide')       renderGuide(el);
 }
 
@@ -440,11 +497,7 @@ function showMsg(id, msg, type='info') {
 }
 
 function statCard(icon, val, label) {
-  return `<div class="stat-card">
-    <div class="stat-icon"><i data-lucide="${icon}"></i></div>
-    <div class="stat-value">${val}</div>
-    <div class="stat-label">${label}</div>
-  </div>`;
+  return `<div class="stat-card"><div class="stat-icon"><i data-lucide="${icon}"></i></div><div class="stat-value">${val}</div><div class="stat-label">${label}</div></div>`;
 }
 
 function lotBadge(lot) {
@@ -565,12 +618,33 @@ function previewSac(e) {
 }
 
 function getGps() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      p => { document.getElementById('nl_gps').value=`${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)}`; },
-      () => alert("Impossible d'obtenir la position GPS.")
-    );
+  if (!navigator.geolocation) {
+    showMsg('nl_msg', "La géolocalisation n'est pas supportée par votre navigateur.", 'error');
+    return;
   }
+  const gpsField = document.getElementById('nl_gps');
+  const originalValue = gpsField.value;
+  gpsField.value = "Recherche GPS...";
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude.toFixed(6);
+      const lng = position.coords.longitude.toFixed(6);
+      gpsField.value = `${lat}, ${lng}`;
+      showMsg('nl_msg', "Position GPS obtenue avec succès.", 'success');
+    },
+    (error) => {
+      gpsField.value = originalValue || "";
+      let errorMsg = "Erreur GPS: ";
+      switch(error.code) {
+        case error.PERMISSION_DENIED: errorMsg += "Permission refusée. Autorisez l'accès à la localisation."; break;
+        case error.POSITION_UNAVAILABLE: errorMsg += "Position non disponible."; break;
+        case error.TIMEOUT: errorMsg += "Délai dépassé."; break;
+        default: errorMsg += error.message;
+      }
+      showMsg('nl_msg', errorMsg, 'error');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
 }
 
 function saveLot() {
@@ -1096,6 +1170,104 @@ function renderGuide(el) {
   setTimeout(()=>lucide.createIcons(),60);
 }
 
+/* ── NOUVEAU : VÉRIFICATION DÉFORESTATION (EXPORTATEUR) ── */
+function renderDeforestationCheck(el) {
+  el.innerHTML = `
+    <div class="card" style="max-width:900px; margin:0 auto;">
+      <div class="card-title"><div class="icon-box green"><i data-lucide="leaf"></i></div>Vérification géographique et conformité au règlement anti‑déforestation (UE 2023/1115)</div>
+      <p style="margin-bottom:1.2rem; color:var(--text-soft);">Saisissez les coordonnées GPS de la parcelle pour obtenir l'adresse précise et évaluer le risque de déforestation selon les aires protégées du Togo.</p>
+      <div class="input-group">
+        <div class="input-label"><i data-lucide="globe"></i><span>Coordonnées GPS (degrés décimaux)</span></div>
+        <div class="coord-row">
+          <div class="coord-field">
+            <input type="text" id="deforest_lat" placeholder="Latitude, ex: 9.545779" value="9.545779">
+            <div class="hint"><i data-lucide="arrow-up"></i><span>Plage : -90 à 90 · point (.)</span></div>
+          </div>
+          <div class="coord-field">
+            <input type="text" id="deforest_lon" placeholder="Longitude, ex: 1.199267" value="1.199267">
+            <div class="hint"><i data-lucide="arrow-right"></i><span>Plage : -180 à 180 · point (.)</span></div>
+          </div>
+        </div>
+        <button id="analyzeDeforestBtn" class="btn btn-primary" style="margin-top:0.5rem;"><i data-lucide="scan"></i> Analyser et vérifier la déforestation</button>
+      </div>
+      <div id="deforestResult" style="margin-top:1.5rem;"></div>
+    </div>
+  `;
+  lucide.createIcons();
+
+  const riskZones = [
+    { name:"Parc national Fazao-Malfakassa", type:"danger", message:"Zone située dans un parc national. La déforestation y est strictement interdite. Aucune récolte de cacao ne peut être issue de cette zone selon la réglementation EUDR.", polygon:(lat,lon)=>(lat>8.5&&lat<9.3&&lon>0.6&&lon<1.1) },
+    { name:"Forêt classée de Togodo (Sud-Est)", type:"danger", message:"Forêt classée à fort taux de déforestation historique. Les lots provenant de cette zone sont non conformes au règlement européen.", polygon:(lat,lon)=>(lat>7.45&&lat<7.65&&lon>0.95&&lon<1.15) },
+    { name:"Forêt classée d'Abdoulaye (Nord)", type:"warning", message:"Zone tampon avec pression agricole modérée. Une diligence raisonnée est requise (imagerie satellite et preuve de non-déforestation après 2020).", polygon:(lat,lon)=>(lat>9.8&&lat<10.2&&lon>1.1&&lon<1.5) },
+    { name:"Réserve de faune de la Kéran", type:"danger", message:"Réserve de faune protégée. La conversion des terres y est interdite. Exportation impossible sans certification spécifique.", polygon:(lat,lon)=>(lat>9.9&&lat<10.4&&lon>0.5&&lon<0.9) },
+    { name:"Forêt classée de la Missahohé (Plateaux)", type:"warning", message:"Zone de transition agricole sensible. Risque de déforestation modéré, vérification approfondie nécessaire.", polygon:(lat,lon)=>(lat>6.9&&lat<7.3&&lon>0.5&&lon<0.85) },
+    { name:"Savane boisée soudanienne", type:"info", message:"Zone de savane arborée à faible risque de déforestation récente. Toutefois, une vérification locale reste recommandée.", polygon:(lat,lon)=>(lat>10.5&&lat<11.2&&lon>0.2&&lon<1.6) }
+  ];
+  function evaluateRisk(lat,lon) {
+    for(const z of riskZones) if(z.polygon(lat,lon)) return { status:z.type, message:z.message, zoneName:z.name };
+    return { status:"safe", message:"Aucune zone de déforestation majeure identifiée. Sous réserve de traçabilité conforme, ce lot peut être considéré comme acceptable selon l'EUDR.", zoneName:"Zone agricole ou hors aires protégées" };
+  }
+  async function getAddress(lat,lon) {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=fr`;
+    const resp = await fetch(url, { headers:{ 'Accept':'application/json', 'User-Agent':'ChainCacao-EUDR-Verifier/1.0' } });
+    if(!resp.ok) throw new Error(`Erreur HTTP ${resp.status}`);
+    const data = await resp.json();
+    if(!data || data.error) throw new Error("Aucune adresse trouvée pour ces coordonnées.");
+    return data;
+  }
+  function displayResult(geoData, lat, lon, risk) {
+    const addr = geoData.address || {};
+    const city = addr.city || addr.town || addr.village || addr.hamlet || "Localité non identifiée";
+    const county = addr.county || "";
+    const state = addr.state || addr.region || "";
+    const country = addr.country || "Togo";
+    const fullLocation = [city, county, state, country].filter(s=>s && s.trim()).join(", ");
+    const shortTags = [city, state, country].filter(s=>s && s.trim()).join(" · ");
+    let statusClass = "status-info";
+    if(risk.status==="danger") statusClass="status-danger";
+    else if(risk.status==="warning") statusClass="status-warning";
+    else if(risk.status==="safe") statusClass="status-safe";
+    let statusIcon = risk.status==="danger" ? '<i data-lucide="alert-triangle"></i>' : (risk.status==="warning" ? '<i data-lucide="alert-circle"></i>' : (risk.status==="safe" ? '<i data-lucide="check-circle"></i>' : '<i data-lucide="info"></i>'));
+    const html = `
+      <div class="result-card">
+        <div class="result-header"><i data-lucide="map-pinned"></i><span>Lieu identifié</span></div>
+        <div class="result-body">
+          <div class="address">${escapeHtml(fullLocation)}</div>
+          <div class="tags"><span class="tag"><i data-lucide="tag"></i> ${escapeHtml(shortTags)}</span><span class="tag"><i data-lucide="flag"></i> ${escapeHtml(country)}</span></div>
+          <div class="coord-panel"><span><i data-lucide="move-3d"></i> Latitude : ${parseFloat(lat).toFixed(6)}°</span><span><i data-lucide="move-3d"></i> Longitude : ${parseFloat(lon).toFixed(6)}°</span><span><i data-lucide="crosshair"></i> Précision : ${parseFloat(geoData.lat || lat).toFixed(5)} , ${parseFloat(geoData.lon || lon).toFixed(5)}</span></div>
+          <hr>
+          <div class="deforestation-status ${statusClass}"><div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">${statusIcon}<strong>Évaluation EUDR – Déforestation</strong></div><div>${escapeHtml(risk.message)}</div><div class="zone-ref"><i data-lucide="layers"></i><span>Zone de référence : ${escapeHtml(risk.zoneName)}</span></div></div>
+        </div>
+      </div>
+    `;
+    document.getElementById("deforestResult").innerHTML = html;
+    lucide.createIcons();
+  }
+  function showError(msg) {
+    document.getElementById("deforestResult").innerHTML = `<div class="result-card"><div class="result-body" style="background:#fff5f5; border-radius:1rem;"><div style="display:flex; align-items:center; gap:0.5rem; color:#c0392b;"><i data-lucide="x-circle"></i><strong>Erreur de vérification</strong></div><div style="margin-top:0.6rem; font-size:0.85rem;">${escapeHtml(msg)}</div></div></div>`;
+    lucide.createIcons();
+  }
+  function showLoading() {
+    document.getElementById("deforestResult").innerHTML = `<div class="result-card"><div class="result-body" style="text-align:center;"><div class="loader"><i data-lucide="loader-circle" class="spin"></i><span>Analyse en cours...</span></div><div style="font-size:0.75rem; margin-top:0.5rem; color:#6f8f63;">Récupération des données géographiques et vérification de la déforestation</div></div></div>`;
+    lucide.createIcons();
+  }
+  function sanitize(v) { return v.trim().replace(',', '.'); }
+  async function process() {
+    try {
+      showLoading();
+      const lat = parseFloat(sanitize(document.getElementById("deforest_lat").value));
+      const lon = parseFloat(sanitize(document.getElementById("deforest_lon").value));
+      if(isNaN(lat)||isNaN(lon)) throw new Error("Latitude ou longitude invalide.");
+      if(lat<-90||lat>90) throw new Error("Latitude hors plage (-90 à 90).");
+      if(lon<-180||lon>180) throw new Error("Longitude hors plage (-180 à 180).");
+      const geoData = await getAddress(lat, lon);
+      const risk = evaluateRisk(lat, lon);
+      displayResult(geoData, lat, lon, risk);
+    } catch(e) { showError(e.message || "Erreur de connexion au service de géocodage."); }
+  }
+  document.getElementById("analyzeDeforestBtn").addEventListener("click", process);
+}
+
 function checkUrlLot() {
   const id=new URLSearchParams(window.location.search).get('lot');
   if (!id||!currentUser) return;
@@ -1106,6 +1278,12 @@ function checkUrlLot() {
     showPage('transformer');
     setTimeout(()=>{ const el=document.getElementById('tr_lotId'); if(el){el.value=id;chargerLotCoop();} },400);
   }
+}
+
+// Helper escapeHtml (déjà utilisé plus haut)
+function escapeHtml(str) {
+  if(!str) return "";
+  return str.replace(/[&<>]/g, function(m) { if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m; });
 }
 
 lucide.createIcons();

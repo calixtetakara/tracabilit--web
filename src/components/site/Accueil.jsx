@@ -64,11 +64,11 @@ export default function Accueil({ onConnexionClick }) {
               width: '100%',
               justifyContent: 'center',
             }}>
-              <a href="#" style={btnPrimary}>
-                <i className="fas fa-clipboard-list" style={{ fontSize: '1rem', lineHeight: 1 }}></i>
-                Vérifier un lot
-              </a>
-              <a href="#" style={btnSecondary}>
+              <a href="/verifier-lot.html" style={btnPrimary}>
+               <i className="fas fa-clipboard-list" style={{ fontSize: '1rem', lineHeight: 1 }}></i>
+               Vérifier un lot
+                </a>
+              <a href="/dashboard.html" style={btnSecondary}>
                 <i className="fas fa-chalkboard-user" style={{ fontSize: '1rem', lineHeight: 1 }}></i>
                 Accéder à la plateforme
               </a>

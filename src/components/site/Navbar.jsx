@@ -13,7 +13,7 @@ export default function Navbar() {
       <div className="nav-links">
         <a href="#"><i className="fas fa-home"></i> Accueil</a>
         <a href="#"><i className="fas fa-link"></i> Traçabilité</a>
-        <a href="#"><i className="fas fa-search"></i> Vérifier un lot</a>
+        <a href="/verifier-lot.html"><i className="fas fa-search"></i> Vérifier un lot</a>
        <a href="#" className="btn-outline-nav" onClick={(e) => {
           e.preventDefault();
           window.location.href = '/dashboard.html';  // Redirection vers le dashboard HTML

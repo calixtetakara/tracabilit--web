@@ -11,20 +11,19 @@ export default function JoinSection() {
             Que vous soyez agriculteur, coopérative, transformateur ou exportateur,
             la plateforme vous attend.
           </p>
-          <button className="join-button">
+          <a href="/dashboard.html" className="join-button">
             Choisir mon rôle <span className="arrow">→</span>
-          </button>
+          </a>
         </div>
       </div>
 
       <style jsx>{`
         .join-section {
-          /* Couleur de fond qui entoure l’image */
           background-color: #d4e0c8;
           border-radius: 40px;
           margin: 3rem auto;
           max-width: 1200px;
-          padding: 16px; /* espace entre le bord de la section et l’image */
+          padding: 16px;
         }
 
         .join-bg {
@@ -39,7 +38,6 @@ export default function JoinSection() {
           padding: 5rem 1.5rem;
         }
 
-        /* Si vous voulez désactiver l’effet fixed sur mobile */
         @media (max-width: 768px) {
           .join-bg {
             background-attachment: scroll;
@@ -80,6 +78,9 @@ export default function JoinSection() {
         }
 
         .join-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
           background: #f5b642;
           border: none;
           padding: 0.9rem 2rem;
@@ -90,9 +91,7 @@ export default function JoinSection() {
           cursor: pointer;
           transition: all 0.3s ease;
           box-shadow: 0 4px 12px rgba(245, 182, 66, 0.4);
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
+          text-decoration: none;
         }
 
         .join-button:hover {

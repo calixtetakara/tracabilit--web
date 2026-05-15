@@ -1,13 +1,66 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/src/assets/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>chaincacao</title>
+
+    <title>ChainCacao – Traçabilité EUDR pour le cacao et café togolais</title>
+
+    <meta name="description" content="ChainCacao est une plateforme de traçabilité transparente pour la filière café-cacao au Togo. Conforme au règlement européen EUDR (anti‑déforestation), elle permet aux agriculteurs, coopératives et exportateurs de prouver l’origine géographique de leurs lots et d’accéder aux marchés européens." />
+
+    <meta name="keywords" content="ChainCacao, traçabilité, cacao, café, Togo, EUDR, blockchain, déforestation, exportation, agriculteur, coopérative, certification, règlement UE 2023/1115" />
+
+    <meta name="author" content="ChainCacao – Initiative Togo" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content="ChainCacao – Traçabilité transparente pour le cacao togolais" />
+    <meta property="og:description" content="De la parcelle à l’importateur européen : un historique complet, infalsifiable et accessible à tous. Valorisez votre récolte, obtenez vos certifications premium UE 2025." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://chaincacao.tg" />
+    <meta property="og:image" content="https://chaincacao.tg/src/assets/logo.png" />
+    <meta property="og:image:alt" content="Logo ChainCacao – Traçabilité EUDR" />
+    <meta property="og:locale" content="fr_FR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ChainCacao – Traçabilité EUDR pour le cacao et café togolais" />
+    <meta name="twitter:description" content="Plateforme de traçabilité géographique conforme au règlement anti‑déforestation. Accédez à la blockchain locale et générez vos rapports certifiés." />
+    <meta name="twitter:image" content="https://chaincacao.tg/src/assets/logo.png" />
+    <meta name="twitter:image:alt" content="Logo ChainCacao" />
+
+    <!-- Robots (SEO) -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+
+    <!-- Préconnexion aux CDN pour améliorer les performances -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+
+    <!-- Polices Google (Sora & Space Mono) -->
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+    <!-- Styles globaux (si nécessaires, sinon on peut laisser chaque page gérer son propre style) -->
+    <style>
+      /* Style minimal pour la racine (les pages internes gèrent leur propre design) */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Sora', sans-serif;
+        background: #eef3e6;
+      }
+    </style>
   </head>
+
   <body>
     <div id="root"></div>
+
+    <!-- Les scripts sont gérés par Vite/React, mais on peut charger des librairies communes ici -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

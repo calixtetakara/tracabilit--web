@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChainCacao – Vérification publique d’un lot (EUDR)</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Sora', sans-serif;
+      background: #eef3e6;
+      color: #1e3a1e;
+      min-height: 100vh;
+      padding: 0;
+    }
+    /* Navbar */
+    .navbar {
+      background: #1e3a1e;
+      padding: 0 2rem;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo img {
+      height: 45px;
+      width: auto;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .logo h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(120deg, #FBBF24, #F59E0B);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,240,0.12);
+      border: 1px solid rgba(255,215,140,0.5);
+      color: white;
+      padding: 8px 18px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .nav-btn:hover {
+      background: #e67e22;
+      border-color: #e67e22;
+      transform: translateY(-2px);
+    }
+    .nav-btn i { width: 16px; height: 16px; }
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .card {
+      background: white;
+      border-radius: 28px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      border: 1px solid #d4e0c8;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .card-header {
+      background: #1e3a1e;
+      padding: 1.5rem 2rem;
+      color: white;
+    }
+    .card-header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .card-header p {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-top: 0.5rem;
+    }
+    .badge-eudr {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #e67e22;
+      border-radius: 40px;
+      padding: 0.2rem 1rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-top: 0.75rem;
+    }
+    .card-body { padding: 2rem; }
+    .search-group {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .search-group input {
+      flex: 2;
+      min-width: 200px;
+      padding: 0.9rem 1.2rem;
+      border: 1.5px solid #d4e0c8;
+      border-radius: 60px;
+      font-size: 0.9rem;
+      font-family: 'Space Mono', monospace;
+      background: #fefef9;
+    }
+    .search-group input:focus {
+      outline: none;
+      border-color: #2c5e2a;
+      box-shadow: 0 0 0 3px rgba(44,94,42,0.1);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.9rem 1.8rem;
+      border-radius: 60px;
+      border: none;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-primary {
+      background: #2c5e2a;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #1e3a1e;
+      transform: translateY(-2px);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid #2c5e2a;
+      color: #2c5e2a;
+    }
+    .btn-outline:hover {
+      background: #2c5e2a;
+      color: white;
+    }
+    .result-box {
+      background: #fafcf7;
+      border-radius: 20px;
+      border: 1px solid #e0ebd6;
+      padding: 1.2rem;
+      margin-top: 1rem;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #e0ebd6;
+    }
+    .row:last-child { border-bottom: none; }
+    .key {
+      font-weight: 600;
+      color: #4a6840;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .val {
+      font-weight: 700;
+      color: #1e3a1e;
+      text-align: right;
+      max-width: 60%;
+      word-break: break-word;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 40px;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-orange { background: #fed7aa; color: #c2410c; }
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-gray { background: #eef3e6; color: #4a6840; }
+    .lot-id {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      font-weight: 800;
+      background: #eef3e6;
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 20px;
+      margin-top: 1rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #d4e0c8;
+    }
+    .timeline-event {
+      position: relative;
+      margin-bottom: 1rem;
+      background: white;
+      border-radius: 14px;
+      padding: 0.8rem 1rem;
+      border: 1px solid #d4e0c8;
+      font-size: 0.8rem;
+    }
+    .timeline-event::before {
+      content: '';
+      position: absolute;
+      left: -17px;
+      top: 14px;
+      width: 10px;
+      height: 10px;
+      background: #e67e22;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    .timeline-step {
+      font-weight: 700;
+      color: #1e3a1e;
+      margin-bottom: 0.3rem;
+    }
+    .qr-box {
+    background: white;
+    border: 2px dashed #d4e0c8;
+    border-radius: 16px;
+    padding: 1.2rem;
+    text-align: center;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qr-box canvas,
+  .qr-box img {
+    display: block;
+    margin: 0 auto;
+  }
+
+  #publicQr {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+    .alert {
+      padding: 0.8rem 1rem;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+    .alert-error {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+    .footer {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #6f8f63;
+      margin: 1.5rem 0 2rem;
+    }
+    hr { margin: 1rem 0; border: none; border-top: 1px solid #e0ebd6; }
+    @media (max-width: 600px) {
+      .navbar { flex-direction: column; height: auto; padding: 0.8rem 1rem; gap: 0.5rem; }
+      .nav-links { width: 100%; justify-content: center; }
+      .card-body { padding: 1.2rem; }
+      .search-group { flex-direction: column; }
+      .row { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+      .val { text-align: left; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar publique -->
+<div class="navbar">
+  <div class="logo">
+    <a href="/">
+      <img src="/src/assets/logo.png" alt="Logo ChainCacao">
+      <h1>Chaîne Cacao</h1>
+    </a>
+  </div>
+  <div class="nav-links">
+    <a href="/" class="nav-btn" id="backHomeBtn">
+      <i data-lucide="home"></i> Retour à l'accueil
+    </a>
+    <a href="/dashboard.html" class="nav-btn" id="goToPlatformBtn">
+      <i data-lucide="log-in"></i> Accéder à la plateforme
+    </a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div class="card-header">
+      <h1><i data-lucide="scan"></i> Vérification publique</h1>
+      <p>Consultez la traçabilité complète d’un lot – Conformité EUDR</p>
+      <div class="badge-eudr"><i data-lucide="leaf"></i> Règlement UE 2023/1115</div>
+    </div>
+    <div class="card-body">
+      <div class="search-group">
+        <input type="text" id="lotIdInput" placeholder="Identifiant du lot, ex: CACAO-0001" autocomplete="off">
+        <button class="btn btn-primary" id="verifyBtn"><i data-lucide="search"></i> Vérifier le lot</button>
+      </div>
+      <div id="resultContainer"></div>
+    </div>
+  </div>
+  <div class="footer">
+    <i data-lucide="map-pin" style="width:12px;height:12px;"></i> Données enregistrées en local – Traçabilité de la parcelle à l’export
+  </div>
+</div>
+
+<script>
+  // Récupération des lots depuis localStorage (identique à dashboard.html)
+  function getLots() {
+    return JSON.parse(localStorage.getItem('cc_lots') || '[]');
+  }
+
+  // Utilitaires
+  function fmtDate(d) {
+    try { return new Date(d).toLocaleDateString('fr-FR'); } catch(e) { return d; }
+  }
+  function fmtDT(d) {
+    try { return new Date(d).toLocaleString('fr-FR'); } catch(e) { return d; }
+  }
+  function timelineHtml(hist) {
+    if (!hist || !hist.length) return '<p style="color:#4a6840;">Aucun historique.</p>';
+    return `<div class="timeline">${hist.map(ev => `
+      <div class="timeline-event">
+        <div class="timeline-step">${ev.etape} — ${ev.acteur}</div>
+        <div><i data-lucide="calendar" style="width:12px;"></i> ${fmtDT(ev.date)}</div>
+        <div><i data-lucide="map-pin" style="width:12px;"></i> ${ev.localisation} | <i data-lucide="scale"></i> ${ev.poids} kg</div>
+        ${ev.comment ? `<div><i data-lucide="file-text"></i> ${ev.comment}</div>` : ''}
+      </div>`).join('')}</div>`;
+  }
+
+  // Génération du rapport PDF (identique à dashboard.html)
+  function genererRapportEUDR(lot) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const GR = [30,58,30], ACC = [230,126,34], W = [255,255,255], LG = [238,243,230], GS = [74,104,64];
+    doc.setFillColor(...GR); doc.rect(0,0,210,46,'F');
+    doc.setFillColor(...ACC); doc.rect(0,42,210,4,'F');
+    doc.setTextColor(...W);
+    doc.setFontSize(22); doc.setFont(undefined,'bold');
+    doc.text('ChainCacao', 15, 18);
+    doc.setFontSize(10); doc.setFont(undefined,'normal');
+    doc.text('Rapport de traçabilité conforme au Règlement EUDR (UE 2023/1115)', 15, 28);
+    const now = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+    doc.setFontSize(8);
+    doc.text(`Généré le ${now}`, 15, 36);
+    doc.setFillColor(255,248,236);
+    doc.roundedRect(130,12,68,24,4,4,'F');
+    doc.setTextColor(...ACC); doc.setFontSize(7); doc.setFont(undefined,'bold');
+    doc.text('IDENTIFIANT DU LOT', 164,19,{align:'center'});
+    doc.setFontSize(11); doc.setTextColor(...GR);
+    doc.text(lot.id, 164,29,{align:'center'});
+
+    let y=58;
+    doc.setFillColor(...LG); doc.rect(10,y,190,8,'F');
+    doc.setDrawColor(...GR); doc.rect(10,y,190,8,'S');
+    doc.setTextColor(...GR); doc.setFontSize(9); doc.setFont(undefined,'bold');
+    doc.text('INFORMATIONS DU LOT', 14, y+5.5);
+    y+=14;
+
+    const fields = [
+      ['Espèce / Variété', lot.espece],
+      ['Producteur', lot.producteur],
+      ['Téléphone producteur', lot.producteurPhone||'N/A'],
+      ['Coopérative', lot.cooperative],
+      ['Coordonnées GPS (parcelle)', lot.gpsOrigine],
+      ['Date de récolte', fmtDate(lot.dateRecolte)],
+      ['Poids initial récolté', `${lot.poidsInitial} kg`],
+      ['Poids après transformation', `${lot.nouveauPoids||lot.poidsInitial} kg`],
+      ['Lot transformé', lot.transformed?'Oui':'Non'],
+      ['Lot exporté', lot.exported?'Oui':'Non'],
+    ];
+    doc.setFontSize(9);
+    fields.forEach(([k,v],i)=>{
+      if (y>275){doc.addPage();y=20;}
+      if (i%2===0){doc.setFillColor(248,252,246);doc.rect(10,y-5,190,8,'F');}
+      doc.setTextColor(...GS); doc.setFont(undefined,'normal'); doc.text(k, 14, y);
+      doc.setTextColor(...GR); doc.setFont(undefined,'bold'); doc.text(String(v), 120, y);
+      doc.setDrawColor(220,230,215); doc.line(10,y+2,200,y+2);
+      y+=9;
+    });
+    y+=4;
+    if (y>250){doc.addPage();y=20;}
+    doc.setFillColor(...LG); doc.rect(10,y,190,8,'F');
+    doc.setDrawColor(...GR); doc.rect(10,y,190,8,'S');
+    doc.setTextColor(...GR); doc.setFontSize(9); doc.setFont(undefined,'bold');
+    doc.text('HISTORIQUE COMPLET DE TRAÇABILITÉ', 14, y+5.5);
+    y+=14;
+    lot.historique.forEach((ev,i)=>{
+      if (y>265){doc.addPage();y=20;}
+      doc.setFillColor(...ACC); doc.circle(15.5,y,4,'F');
+      doc.setTextColor(...W); doc.setFontSize(7.5); doc.setFont(undefined,'bold');
+      doc.text(String(i+1), 15.5, y+1, {align:'center'});
+      doc.setTextColor(...GR); doc.setFontSize(9.5); doc.setFont(undefined,'bold');
+      doc.text(`${ev.etape}`, 23, y);
+      doc.setFontSize(8.5); doc.setFont(undefined,'normal'); doc.setTextColor(...GS);
+      doc.text(`Acteur : ${ev.acteur}`, 80, y);
+      y+=7;
+      doc.setFontSize(8); doc.setTextColor(...GS); doc.setFont(undefined,'normal');
+      doc.text(`Date : ${fmtDT(ev.date)}`, 23, y); y+=5.5;
+      doc.text(`Localisation : ${ev.localisation}`, 23, y); y+=5.5;
+      doc.text(`Poids : ${ev.poids} kg`, 23, y); y+=5.5;
+      if (ev.comment){doc.text(`Commentaire : ${ev.comment}`, 23, y); y+=5.5;}
+      doc.setDrawColor(220,230,215); doc.line(23,y,195,y); y+=5;
+    });
+    if (y>252){doc.addPage();y=20;}
+    y+=4;
+    doc.setFillColor(...GR); doc.rect(10,y,190,26,'F');
+    doc.setFillColor(...ACC); doc.rect(10,y,4,26,'F');
+    doc.setTextColor(...W); doc.setFontSize(9); doc.setFont(undefined,'bold');
+    doc.text('CERTIFICATION DE CONFORMITÉ EUDR', 18, y+8);
+    doc.setFontSize(7.5); doc.setFont(undefined,'normal');
+    doc.text('Ce document certifie que la traçabilité géographique du lot est complète et que le produit', 18, y+15);
+    doc.text('est conforme au Règlement (UE) 2023/1115 relatif à la déforestation (EUDR), applicable depuis 2025.', 18, y+21);
+    doc.save(`ChainCacao_EUDR_${lot.id}.pdf`);
+  }
+
+  // Affichage détaillé
+  function afficherDetailsLot(lot) {
+    const container = document.getElementById('resultContainer');
+    if (!lot) {
+      container.innerHTML = `<div class="alert alert-error"><i data-lucide="x-circle"></i> Lot introuvable. Vérifiez l’identifiant.</div>`;
+      lucide.createIcons();
+      return;
+    }
+    const html = `
+      <div class="result-box">
+        <div class="row"><span class="key">Identifiant</span><span class="val"><span class="lot-id">${lot.id}</span></span></div>
+        <div class="row"><span class="key">Espèce</span><span class="val">${lot.espece}</span></div>
+        <div class="row"><span class="key">Producteur</span><span class="val">${lot.producteur}</span></div>
+        <div class="row"><span class="key">Coopérative</span><span class="val">${lot.cooperative}</span></div>
+        <div class="row"><span class="key">GPS parcelle</span><span class="val">${lot.gpsOrigine}</span></div>
+        <div class="row"><span class="key">Date récolte</span><span class="val">${fmtDate(lot.dateRecolte)}</span></div>
+        <div class="row"><span class="key">Poids initial</span><span class="val">${lot.poidsInitial} kg</span></div>
+        <div class="row"><span class="key">Transformé</span><span class="val">${lot.transformed ? '<span class="badge badge-green">Oui</span>' : '<span class="badge badge-orange">Non</span>'}</span></div>
+        <div class="row"><span class="key">Exporté</span><span class="val">${lot.exported ? '<span class="badge badge-blue">Oui</span>' : '<span class="badge badge-gray">Non</span>'}</span></div>
+      </div>
+      <div style="margin-top: 1rem;"><strong>Historique complet de traçabilité</strong></div>
+      ${timelineHtml(lot.historique)}
+      <div class="qr-box">
+        <div style="font-weight: 700; margin-bottom: 0.5rem;">QR code de traçabilité</div>
+        <div id="publicQr"></div>
+        <button class="btn btn-outline" style="margin-top: 1rem;" id="downloadPdfBtn"><i data-lucide="file-text"></i> Télécharger le rapport EUDR (PDF)</button>
+      </div>
+    `;
+    container.innerHTML = html;
+    setTimeout(() => {
+      const qrDiv = document.getElementById('publicQr');
+      if (qrDiv) new QRCode(qrDiv, { text: window.location.origin + window.location.pathname + '?lot=' + lot.id, width: 160, height: 160 });
+      const pdfBtn = document.getElementById('downloadPdfBtn');
+      if (pdfBtn) pdfBtn.onclick = () => genererRapportEUDR(lot);
+      lucide.createIcons();
+    }, 100);
+  }
+
+  function verifierLot() {
+    const inputId = document.getElementById('lotIdInput').value.trim();
+    if (!inputId) {
+      document.getElementById('resultContainer').innerHTML = `<div class="alert alert-error"><i data-lucide="alert-circle"></i> Veuillez saisir un identifiant de lot.</div>`;
+      lucide.createIcons();
+      return;
+    }
+    const lots = getLots();
+    const lot = lots.find(l => l.id === inputId);
+    afficherDetailsLot(lot);
+  }
+
+  document.getElementById('verifyBtn').addEventListener('click', verifierLot);
+  document.getElementById('lotIdInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') verifierLot(); });
+  const urlParams = new URLSearchParams(window.location.search);
+  const lotParam = urlParams.get('lot');
+  if (lotParam) {
+    document.getElementById('lotIdInput').value = lotParam;
+    verifierLot();
+  }
+  lucide.createIcons();
+</script>
+</body>
+</html>
